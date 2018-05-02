@@ -299,15 +299,15 @@ import com.mongodb.async.client.MongoClient;
 <h3 id="specify-compression-via-mongoclientsettings">Specify compression via <code>MongoClientSettings</code></h3>
 
 <pre><code class="language-java">import com.mongodb.connection.ClusterSettings;
-import com.mongodb.async.client.MongoClientSettings;
 import com.mongodb.async.client.MongoClients;
 import com.mongodb.async.client.MongoClient;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCompressor;
 import java.util.Arrays;
 
 </code></pre>
 
-<p>To specify compression with <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/async/client/MongoClientSettings.html
+<p>To specify compression with <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/MongoClientSettings.html
 "><code>MongoClientSettings</code></a>, set the <code>compressors</code> property
 to a list of <code>MongoCompressor</code> instances:</p>
 

@@ -337,8 +337,8 @@ import static java.util.Arrays.asList;
 <pre><code class="language-java">MongoClient mongoClient = MongoClients.create(new ConnectionString(&quot;mongodb://localhost&quot;));
 </code></pre></li>
 
-<li><p>You can call <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/async/client/MongoClients.html#create-com.mongodb.async.client.MongoClientSettings-
-"><code>MongoClients.create()</code></a> with a <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/async/client/MongoClientSettings.html
+<li><p>You can call <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/async/client/MongoClients.html#create-com.mongodb.MongoClientSettings-
+"><code>MongoClients.create()</code></a> with a <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/MongoClientSettings.html
 "><code>MongoClientSettings</code></a> object. To specify the host information, use the <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/connection/ClusterSettings.html
 "><code>ClusterSettings</code></a>.</p>
 
@@ -353,7 +353,7 @@ MongoClient mongoClient = MongoClients.create(settings);
 
 <div class="admonition tip">
 <h5 class="admonition-title">tip</h5>
-<p><a href="/mongo-java-driver/3.7/javadoc?com/mongodb/async/client/MongoClientSettings.html"><code>MongoClientSettings</code></a> provide more configuration options than a connection string.</p>
+<p><a href="/mongo-java-driver/3.7/javadoc?com/mongodb/MongoClientSettings.html"><code>MongoClientSettings</code></a> provide more configuration options than a connection string.</p>
 
 </div>
 
@@ -411,8 +411,8 @@ MongoClient mongoClient = MongoClients.create(settings);
       new ConnectionString(&quot;mongodb://host1:27017,host2:27017,host3:27017/?replicaSet=myReplicaSet&quot;));
 </code></pre></li>
 
-<li><p>You can call <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/async/client/MongoClients.html#create-com.mongodb.async.client.MongoClientSettings-
-"><code>MongoClients.create()</code></a> with a <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/async/client/MongoClientSettings.html
+<li><p>You can call <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/async/client/MongoClients.html#create-com.mongodb.MongoClientSettings-
+"><code>MongoClients.create()</code></a> with a <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/MongoClientSettings.html
 "><code>MongoClientSettings</code></a> object. To specify the host information of the replica set members, use <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/connection/ClusterSettings.html
 "><code>ClusterSettings</code></a>.</p>
 
@@ -458,8 +458,8 @@ MongoClient mongoClient = MongoClients.create(settings);
             new ConnectionString(&quot;mongodb://localhost&quot;));
 </code></pre></li>
 
-<li><p>You can call <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/async/client/MongoClients.html#create-com.mongodb.async.client.MongoClientSettings-
-"><code>MongoClients.create()</code></a> with a <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/async/client/MongoClientSettings.html
+<li><p>You can call <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/async/client/MongoClients.html#create-com.mongodb.MongoClientSettings-
+"><code>MongoClients.create()</code></a> with a <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/MongoClientSettings.html
 "><code>MongoClientSettings</code></a> object. To specify the host information of the <code>mongos</code> instance, use <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/connection/ClusterSettings.html
 "><code>ClusterSettings</code></a>:</p>
 
@@ -490,8 +490,8 @@ MongoClient mongoClient = MongoClients.create(settings);
             new ConnectionString(&quot;mongodb://host1:27017,host2:27017&quot;));
 </code></pre></li>
 
-<li><p>You can call <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/async/client/MongoClients.html#create-com.mongodb.async.client.MongoClientSettings-
-"><code>MongoClients.create()</code></a> with a <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/async/client/MongoClientSettings.html
+<li><p>You can call <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/async/client/MongoClients.html#create-com.mongodb.MongoClientSettings-
+"><code>MongoClients.create()</code></a> with a <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/MongoClientSettings.html
 "><code>MongoClientSettings</code></a> object. To specify the host information of the <code>mongos</code> instances, use <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/connection/ClusterSettings.html
 "><code>ClusterSettings</code></a>:</p>
 
@@ -541,7 +541,7 @@ in Java 7.  However, an application must use <a href="http://netty.io/">Netty</a
 <pre><code class="language-java">MongoClient client = MongoClients.create(&quot;mongodb://localhost/?streamType=netty&quot;);
 </code></pre></li>
 
-<li><p>Configure <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/async/client/MongoClientSettings.Builder.html#streamFactoryFactory-com.mongodb.connection.StreamFactoryFactory-
+<li><p>Configure <a href="/mongo-java-driver/3.7/javadoc?com/mongodb/MongoClientSettings.Builder.html#streamFactoryFactory-com.mongodb.connection.StreamFactoryFactory-
 "><code>MongoClientSettings</code></a> with the <code>StreamFactory</code> set to use Netty:</p>
 
 <pre><code class="language-java">MongoClient client = MongoClients.create(MongoClientSettings.builder()

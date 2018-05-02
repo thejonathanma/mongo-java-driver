@@ -515,9 +515,7 @@ Field Updates This section describes update operators that apply to the value of
       <pubDate>Thu, 19 Mar 2015 12:53:39 -0400</pubDate>
       
       <guid>/mongo-java-driver/3.7/upgrading/</guid>
-      <description>Upgrading from 3.6.x The 3.7 release is binary and source compatible with the 3.5 release, except for methods that have been added to interfaces that have been marked as unstable, and changes to classes or interfaces that have been marked as internal or annotated as Beta.
-Upgrading from 2.x You must upgrade first to 3.0 driver. See the Upgrade guide in the 3.0 driver reference documentation.
-System Requirements The minimum JVM is now Java 6: however, specific features require Java 7:</description>
+      <description>Upgrading from 3.6.x In order to modularize the driver for Java 9, the `MongoDriverInformation class had to be moved from the com.mongodb.client package to the com.mongodb package. Generally the only consumers who rely on this class directly are other drivers that wrap the Java driver, so it&amp;rsquo;s not expected that this change will affect many applications, so long as they also upgrade any wrapping drivers they they rely on (e .</description>
     </item>
     
     <item>
@@ -674,7 +672,7 @@ import com.mongodb.Block; import com.mongodb.async.SingleResultCallback; import 
       <description>Installation The recommended way to get started using one of the drivers in your project is with a dependency management system.
 important The MongoDB Async Driver requires either Netty or Java 7.
   MongoDB Async Driver The MongoDB Async Driver provides asynchronous API that can leverage either Netty or Java 7&amp;rsquo;s AsynchronousSocketChannel for fast and non-blocking I/O.
-&amp;lt;dependencies&amp;gt; &amp;lt;dependency&amp;gt; &amp;lt;groupId&amp;gt;org.mongodb&amp;lt;/groupId&amp;gt; &amp;lt;artifactId&amp;gt;mongodb-driver-async&amp;lt;/artifactId&amp;gt; &amp;lt;version&amp;gt;3.7.0-rc0&amp;lt;/version&amp;gt; &amp;lt;/dependency&amp;gt; &amp;lt;/dependencies&amp;gt;    dependencies { compile &#39;org.</description>
+&amp;lt;dependencies&amp;gt; &amp;lt;dependency&amp;gt; &amp;lt;groupId&amp;gt;org.mongodb&amp;lt;/groupId&amp;gt; &amp;lt;artifactId&amp;gt;mongodb-driver-async&amp;lt;/artifactId&amp;gt; &amp;lt;version&amp;gt;3.7.0&amp;lt;/version&amp;gt; &amp;lt;/dependency&amp;gt; &amp;lt;/dependencies&amp;gt;    dependencies { compile &#39;org.</description>
     </item>
     
     <item>
