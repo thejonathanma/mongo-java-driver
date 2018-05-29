@@ -20,6 +20,7 @@ com.mongodb.client.result
 com.mongodb.connection
 com.mongodb.connection.netty
 com.mongodb.diagnostics.logging
+com.mongodb.embedded.client
 com.mongodb.event
 com.mongodb.gridfs
 com.mongodb.lang

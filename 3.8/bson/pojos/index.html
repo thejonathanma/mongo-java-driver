@@ -271,7 +271,7 @@ direct serialization of POJOs and Java Beans to and from BSON. Internally, each 
 <li>Property information, a list of <a href="/mongo-java-driver/3.8/javadoc?org/bson/codecs/pojo/PropertyModel.html
 "><code>PropertyModel</code></a> instances that contain all the
 property metadata. By default this includes; any public getter methods with any corresponding setter methods and any public fields.</li>
-<li>An optional IdProperty. By default the <code>_id</code> or <code>id</code> property in the POJO.</li>
+<li>An optional IdProperty (see <code>BsonId</code> annotation). By default the <code>_id</code> or <code>id</code> property in the POJO.</li>
 <li>Type data for the POJO and its fields to work around type erasure.</li>
 <li>An optional discriminator value. The discriminator is the value used to represent the POJO class being stored.</li>
 <li>An optional discriminator key. The document key name for the discriminator.</li>
