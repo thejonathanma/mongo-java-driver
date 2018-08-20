@@ -278,8 +278,8 @@ that can be found with the driver source on github.</p>
 <p>New MongoClient API (since 3.7):</p>
 
 <pre><code class="language-java">import com.mongodb.ConnectionString;
-import com.mongodb.clients.MongoClients;
-import com.mongodb.clients.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoClient;
 </code></pre>
 
 <p>Legacy MongoClient API:</p>
@@ -534,11 +534,11 @@ for (int i = 0; i &lt; 100; i++) {
 
 <h2 id="count-documents-in-a-collection">Count Documents in A Collection</h2>
 
-<p>To count the number of documents in a collection, you can use the collection&rsquo;s <a href="/mongo-java-driver/3.8/javadoc?com/mongodb/client/MongoCollection#count--.html
-"><code>count()</code></a>
+<p>To count the number of documents in a collection, you can use the collection&rsquo;s <a href="/mongo-java-driver/3.8/javadoc?com/mongodb/client/MongoCollection#countDocuments--.html
+"><code>countDocuments()</code></a>
 method.  The following code should print <code>101</code> (the 100 inserted via <code>insertMany</code> plus the 1 inserted via the <code>insertOne</code>).</p>
 
-<pre><code class="language-java">System.out.println(collection.count());
+<pre><code class="language-java">System.out.println(collection.countDocuments());
 </code></pre>
 
 <h2 id="query-the-collection">Query the Collection</h2>

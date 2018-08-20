@@ -17,7 +17,7 @@
       <pubDate>Tue, 15 Aug 2017 14:19:24 -0400</pubDate>
       
       <guid>/mongo-java-driver/3.8/driver-async/tutorials/change-streams/</guid>
-      <description>Change Streams - Draft MongoDB 3.6 introduces a new $changeStream aggregation pipeline operator.
+      <description>Change Streams MongoDB 3.6 introduces a new $changeStream aggregation pipeline operator.
 Change streams provide a way to watch changes to documents in a collection. To improve the usability of this new stage, the MongoCollection API includes a new watch method. The ChangeStreamIterable sets up the change stream and automatically attempts to resume if it encounters a potentially recoverable error.
 Prerequisites  The example below requires a restaurants collection in the test database.</description>
     </item>
@@ -28,7 +28,7 @@ Prerequisites  The example below requires a restaurants collection in the test d
       <pubDate>Tue, 15 Aug 2017 14:19:24 -0400</pubDate>
       
       <guid>/mongo-java-driver/3.8/driver/tutorials/change-streams/</guid>
-      <description>Change Streams - Draft MongoDB 3.6 introduces a new $changeStream aggregation pipeline operator.
+      <description>Change Streams MongoDB 3.6 introduces a new $changeStream aggregation pipeline operator.
 Change streams provide a way to watch changes to documents in a collection. To improve the usability of this new stage, the MongoCollection API includes a new watch method. The ChangeStreamIterable sets up the change stream and automatically attempts to resume if it encounters a potentially recoverable error.
 Prerequisites  The example below requires a restaurants collection in the test database.</description>
     </item>
@@ -178,10 +178,8 @@ Prerequisites  The example below requires a restaurants collection in the test d
       
       <guid>/mongo-java-driver/3.8/whats-new/</guid>
       <description>What&amp;rsquo;s New in 3.8 Key new features of the 3.8 Java driver release:
-Transactions The Java driver now provides support for executing CRUD operations within a transaction (requires MongoDB 4.0).
-SCRAM-256 Authentication Mechanism The Java driver now provides support for the SCRAM-256 authentication mechanism (requires MongoDB 4.0).
-What&amp;rsquo;s New in 3.7 Key new features of the 3.7 Java driver release:
-Java 9 support Modules The Java driver now provides a set of JAR files that are compliant with the Java 9 module specification, and Automatic-Module-Name declarations have been added to the manifests of those JAR files.</description>
+Transactions The Java driver now provides support for executing CRUD operations within a transaction (requires MongoDB 4.0). See the Transactions and MongoDB Drivers section of the documentation and select the Java (Sync) tab.
+Change Stream enhancements The Java driver now provides support for opening a change stream against an entire database, via new MongoDatabase.watch methods, or an entire deployment, via new MongoClient.</description>
     </item>
     
     <item>
@@ -419,8 +417,8 @@ Match The $match pipeline stage passes all documents matching the specified filt
       <guid>/mongo-java-driver/3.8/driver-async/tutorials/authentication/</guid>
       <description>Authentication The Java driver supports all MongoDB authentication mechanisms, including those only available in the MongoDB Enterprise Edition.
 MongoCredential import com.mongodb.MongoCredential;  An authentication credential is represented as an instance of the MongoCredential class. The MongoCredential class includes static factory methods for each of the supported authentication mechanisms.
-You can also use the ConnectionString and pass it to a MongoClients.create() method.
-Default Authentication Mechanism Starting in MongoDB 3.0, MongoDB changed the default authentication mechanism from MONGODB-CR to SCRAM-SHA-1.</description>
+You can also use a connection string and pass it to a MongoClients.create() method.
+Default Authentication Mechanism In MongoDB 3.0, MongoDB changed the default authentication mechanism from MONGODB-CR to SCRAM-SHA-1.</description>
     </item>
     
     <item>
@@ -675,7 +673,7 @@ import com.mongodb.Block; import com.mongodb.async.SingleResultCallback; import 
       <description>Installation The recommended way to get started using one of the drivers in your project is with a dependency management system.
 important The MongoDB Async Driver requires either Netty or Java 7.
   MongoDB Async Driver The MongoDB Async Driver provides asynchronous API that can leverage either Netty or Java 7&amp;rsquo;s AsynchronousSocketChannel for fast and non-blocking I/O.
-&amp;lt;dependencies&amp;gt; &amp;lt;dependency&amp;gt; &amp;lt;groupId&amp;gt;org.mongodb&amp;lt;/groupId&amp;gt; &amp;lt;artifactId&amp;gt;mongodb-driver-async&amp;lt;/artifactId&amp;gt; &amp;lt;version&amp;gt;3.8.0-beta3&amp;lt;/version&amp;gt; &amp;lt;/dependency&amp;gt; &amp;lt;/dependencies&amp;gt;    dependencies { compile &#39;org.</description>
+&amp;lt;dependencies&amp;gt; &amp;lt;dependency&amp;gt; &amp;lt;groupId&amp;gt;org.mongodb&amp;lt;/groupId&amp;gt; &amp;lt;artifactId&amp;gt;mongodb-driver-async&amp;lt;/artifactId&amp;gt; &amp;lt;version&amp;gt;3.8.1&amp;lt;/version&amp;gt; &amp;lt;/dependency&amp;gt; &amp;lt;/dependencies&amp;gt;    dependencies { compile &#39;org.</description>
     </item>
     
     <item>

@@ -261,7 +261,18 @@
 
 <h3 id="transactions">Transactions</h3>
 
-<p>The Java driver now provides support for executing CRUD operations within a transaction (requires MongoDB 4.0).</p>
+<p>The Java driver now provides support for executing CRUD operations within a transaction (requires MongoDB 4.0).  See the
+<a href="https://docs.mongodb.com/master/core/transactions/#transactions-and-mongodb-drivers">Transactions and MongoDB Drivers</a> section
+of the documentation and select the <code>Java (Sync)</code> tab.</p>
+
+<h3 id="change-stream-enhancements">Change Stream enhancements</h3>
+
+<p>The Java driver now provides support for opening a change stream against an entire database, via new
+<a href="/mongo-java-driver/3.8/javadoc?com/mongodb/client/MongoDatabase.html
+"><code>MongoDatabase.watch</code></a> methods, or an
+entire deployment, via new <a href="/mongo-java-driver/3.8/javadoc?com/mongodb/client/MongoClient.html
+"><code>MongoClient.watch</code></a> methods. See
+<a href="/mongo-java-driver/3.8/driver/tutorials/change-streams/">Change Streams</a> for further details.</p>
 
 <h3 id="scram-256-authentication-mechanism">SCRAM-256 Authentication Mechanism</h3>
 
@@ -664,6 +675,7 @@ collection.bulkWrite(Arrays.asList(
 <li><a href="#what-s-new-in-3-8">What&rsquo;s New in 3.8</a>
 <ul>
 <li><a href="#transactions">Transactions</a></li>
+<li><a href="#change-stream-enhancements">Change Stream enhancements</a></li>
 <li><a href="#scram-256-authentication-mechanism">SCRAM-256 Authentication Mechanism</a></li>
 </ul></li>
 <li><a href="#what-s-new-in-3-7">What&rsquo;s New in 3.7</a>

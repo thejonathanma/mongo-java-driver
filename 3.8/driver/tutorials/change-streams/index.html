@@ -255,7 +255,7 @@
 </ul>
 </div>
 
-<h2 id="change-streams-draft">Change Streams - Draft</h2>
+<h2 id="change-streams">Change Streams</h2>
 
 <p>MongoDB 3.6 introduces a new <a href="http://dochub.mongodb.org/core/changestreams"><code>$changeStream</code></a> aggregation pipeline
 operator.</p>
@@ -311,12 +311,36 @@ MongoCollection&lt;Document&gt; collection = database.getCollection(&quot;restau
 
 <h2 id="watch-the-collection">Watch the collection</h2>
 
-<p>To create a change stream use the the <a href="/mongo-java-driver/3.8/javadoc?com/mongodb/client/MongoCollection.html#watch
-"><code>MongoCollection.watch()</code></a> method.</p>
+<p>To create a change stream use one of the <a href="/mongo-java-driver/3.8/javadoc?com/mongodb/client/MongoCollection.html#watch
+"><code>MongoCollection.watch()</code></a> methods.</p>
 
 <p>In the following example, the change stream prints out all changes it observes.</p>
 
 <pre><code class="language-java">collection.watch().forEach(printBlock);
+</code></pre>
+
+<h2 id="watch-the-database">Watch the database</h2>
+
+<p>New in the 3.8 driver and MongoDB 4.0, applications can open a single change stream to watch all non-system collections of a database. To
+create such a change stream use one of the <a href="/mongo-java-driver/3.8/javadoc?com/mongodb/client/MongoDatabase.html#watch
+"><code>MongoDatabase.watch()</code></a> methods.</p>
+
+<p>In the following example, the change stream prints out all the changes it observes on the given database.</p>
+
+<pre><code class="language-java">database.watch().forEach(printBlock);
+</code></pre>
+
+<h2 id="watch-all-databases">Watch all databases</h2>
+
+<p>New in the 3.8 driver and MongoDB 4.0, applications can open a single change stream to watch all non-system collections of all databases
+in a MongoDB deployment. To create such a change stream use one of the
+<a href="/mongo-java-driver/3.8/javadoc?com/mongodb/client/MongoClient.html#watch
+"><code>MongoClient.watch()</code></a> methods.</p>
+
+<p>In the following example, the change stream prints out all the changes it observes on the deployement to which the <code>MongoClient</code> is
+connected</p>
+
+<pre><code class="language-java">mongoClient.watch().forEach(printBlock);
 </code></pre>
 
 <h2 id="filtering-content">Filtering content</h2>
@@ -355,10 +379,12 @@ so that the document after the update is included in the results.</p></li>
 <ul>
 <li>
 <ul>
-<li><a href="#change-streams-draft">Change Streams - Draft</a></li>
+<li><a href="#change-streams">Change Streams</a></li>
 <li><a href="#prerequisites">Prerequisites</a></li>
 <li><a href="#connect-to-a-mongodb-deployment">Connect to a MongoDB Deployment</a></li>
 <li><a href="#watch-the-collection">Watch the collection</a></li>
+<li><a href="#watch-the-database">Watch the database</a></li>
+<li><a href="#watch-all-databases">Watch all databases</a></li>
 <li><a href="#filtering-content">Filtering content</a></li>
 </ul></li>
 </ul>

@@ -332,7 +332,7 @@ static helper to create a specification for a text index and pass to <a href="/m
 
 <p>For example, the following code performs a text search on the <code>name</code> field for the word <code>&quot;bakery&quot;</code> or <code>&quot;coffee&quot;</code>.</p>
 
-<pre><code class="language-java">collection.count(Filters.text(&quot;bakery coffee&quot;), new SingleResultCallback&lt;Long&gt;()  {
+<pre><code class="language-java">collection.countDocuments(Filters.text(&quot;bakery coffee&quot;), new SingleResultCallback&lt;Long&gt;()  {
     @Override
     public void onResult(final Long count, final Throwable t) {
         System.out.println(&quot;Text search matches: &quot; +count);
@@ -374,7 +374,7 @@ static helper to create a specification for a text index and pass to <a href="/m
 <p>For example, the following text search specifies the <a href="http://docs.mongodb.org/manual/reference/text-search-languages
 ">text search language</a> option when performing text search for the word <code>cafe</code>:</p>
 
-<pre><code class="language-java">collection.count(Filters.text(&quot;cafe&quot;,
+<pre><code class="language-java">collection.countDocuments(Filters.text(&quot;cafe&quot;,
       new TextSearchOptions().language(&quot;english&quot;)),
       new SingleResultCallback&lt;Long&gt;()  {
             @Override

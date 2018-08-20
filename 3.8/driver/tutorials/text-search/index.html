@@ -329,7 +329,7 @@ collection.createIndex(Indexes.text(&quot;name&quot;));
 
 <p>For example, the following code performs a text search on the <code>name</code> field for the word <code>&quot;bakery&quot;</code> or <code>&quot;coffee&quot;</code>.</p>
 
-<pre><code class="language-java">long matchCount = collection.count(Filters.text(&quot;bakery coffee&quot;));
+<pre><code class="language-java">long matchCount = collection.countDocuments(Filters.text(&quot;bakery coffee&quot;));
 System.out.println(&quot;Text search matches: &quot; + matchCount);
 </code></pre>
 
@@ -363,7 +363,7 @@ System.out.println(&quot;Text search matches: &quot; + matchCount);
 <p>For example, the following text search specifies the <a href="http://docs.mongodb.org/manual/reference/text-search-languages
 ">text search language</a> option when performing text search for the word <code>cafe</code>:</p>
 
-<pre><code class="language-java">long matchCountEnglish = collection.count(Filters.text(&quot;cafe&quot;, new TextSearchOptions().language(&quot;english&quot;)));
+<pre><code class="language-java">long matchCountEnglish = collection.countDocuments(Filters.text(&quot;cafe&quot;, new TextSearchOptions().language(&quot;english&quot;)));
 System.out.println(&quot;Text search matches (english): &quot; + matchCountEnglish);
 </code></pre>
 

@@ -556,7 +556,7 @@ for (int i = 0; i &lt; 100; i++) {
 "><code>count()</code></a>
 method.  The following code should print <code>101</code> (the 100 inserted via <code>insertMany</code> plus the 1 inserted via the <code>insertOne</code>).</p>
 
-<pre><code class="language-java">collection.count(
+<pre><code class="language-java">collection.countDocuments(
   new SingleResultCallback&lt;Long&gt;() {
       @Override
       public void onResult(final Long count, final Throwable t) {

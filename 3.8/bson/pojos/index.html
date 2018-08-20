@@ -650,13 +650,20 @@ are applied to both read and write contexts.</p>
 
 @BsonDiscriminator
 public final class Person {
+
+    @BsonId
     public String personId;
     public String firstName;
+
+    @BsonProperty(&quot;surname&quot;)
     public String lastName;
-    
+
+    @BsonIgnore
+    public String password;
+
     @BsonProperty(useDiscriminator = true)
     public Address addr;
-    
+
     public Person(){
     }
 
@@ -665,7 +672,7 @@ public final class Person {
 
 <p>The <code>Person</code> POJO Will produce BSON similar to:</p>
 
-<pre><code class="language-json">{ &quot;_id&quot;: &quot;1234567890&quot;, &quot;_t&quot;: &quot;Person&quot;, &quot;firstName&quot;: &quot;Alan&quot;, &quot;lastName&quot;: &quot;Turing&quot;,
+<pre><code class="language-json">{ &quot;_id&quot;: &quot;1234567890&quot;, &quot;_t&quot;: &quot;Person&quot;, &quot;firstName&quot;: &quot;Alan&quot;, &quot;surname&quot;: &quot;Turing&quot;,
   &quot;address&quot;: { &quot;_t&quot;: &quot;Address&quot;, &quot;address&quot;: &quot;The Mansion&quot;, &quot;street&quot;: &quot;Sherwood Drive&quot;, 
                &quot;town&quot;: &quot;Bletchley&quot;, &quot;postcode&quot;: &quot;MK3 6EB&quot; } }
 </code></pre>

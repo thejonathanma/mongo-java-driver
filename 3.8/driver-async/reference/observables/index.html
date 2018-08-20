@@ -339,12 +339,12 @@ Demand for results is signaled via the <code>Subscription</code> and any results
 <pre><code class="language-java">    Block&lt;SingleResultCallback&lt;Long&gt;&gt; operation = new Block&lt;SingleResultCallback&lt;Long&gt;&gt;() {
         @Override
         void apply(final SingleResultCallback&lt;Long&gt; callback) {
-            collection.count(callback);
+            collection.countDocuments(callback);
         }
     };
 
     // Or in Java 8 syntax:
-    operation = (Block&lt;SingleResultCallback&lt;Long&gt;&gt;) collection::count;
+    operation = (Block&lt;SingleResultCallback&lt;Long&gt;&gt;) collection::countDocuments;
 
     Observables.observe(operation).subscribe(new Observer&lt;Long&gt;(){
         @Override

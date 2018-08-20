@@ -475,7 +475,7 @@ which takes a list of <code>Person</code>.</p>
 collection.insertMany(people, new SingleResultCallback&lt;Void&gt;() {
     @Override
     public void onResult(final Void result, final Throwable t) {
-        collection.count(new SingleResultCallback&lt;Long&gt;() {
+        collection.countDocuments(new SingleResultCallback&lt;Long&gt;() {
             @Override
             public void onResult(final Long count, final Throwable t) {
                 System.out.println(&quot;total # of people &quot; + count);
