@@ -102,6 +102,7 @@ public interface MongoClient extends Closeable {
      * @return the list databases iterable interface
      */
     ListDatabasesIterable<Document> listDatabases();
+
     /**
      * Gets the list of databases
      *
