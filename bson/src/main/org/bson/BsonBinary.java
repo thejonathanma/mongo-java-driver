@@ -16,7 +16,10 @@
 
 package org.bson;
 
+import org.bson.internal.UuidHelper;
+
 import java.util.Arrays;
+import java.util.UUID;
 
 /**
  * A representation of the BSON Binary type.  Note that for performance reasons instances of this class are not immutable,
@@ -73,6 +76,69 @@ public class BsonBinary extends BsonValue {
         }
         this.type = type;
         this.data = data;
+    }
+
+    /**
+     * Construct a Type 4 BsonBinary from the given UUID.
+     *
+     * @param uuid the UUID
+     */
+    public BsonBinary(final UUID uuid) {
+        this(uuid, UuidRepresentation.STANDARD);
+    }
+
+    /**
+     * Construct a new instance from the given UUID and UuidRepresentation
+     *
+     * @param uuid the UUID
+     * @param uuidRepresentation the UUID representation
+     */
+    public BsonBinary(final UUID uuid, final UuidRepresentation uuidRepresentation) {
+        if (uuid == null) {
+            throw new IllegalArgumentException("uuid may not be null");
+        }
+        if (uuidRepresentation == null) {
+            throw new IllegalArgumentException("uuidRepresentation may not be null");
+        }
+        this.data = UuidHelper.encodeUuidToBinary(uuid, uuidRepresentation);
+        this.type = uuidRepresentation == UuidRepresentation.STANDARD
+                ? BsonBinarySubType.UUID_STANDARD.getValue()
+                : BsonBinarySubType.UUID_LEGACY.getValue();
+    }
+
+    /**
+     * Returns the binary as a UUID. The binary type must be 4.
+     *
+     * @return the uuid
+     */
+    public UUID asUuid() {
+        if (type != BsonBinarySubType.UUID_STANDARD.getValue()) {
+            throw new BsonInvalidOperationException("BsonBinarySubType must be UUID_STANDARD.");
+        }
+
+        return UuidHelper.decodeBinaryToUuid(this.data.clone(), this.type, UuidRepresentation.STANDARD);
+    }
+
+    /**
+     * Returns the binary as a UUID.
+     *
+     * @param uuidRepresentation the UUID representation
+     * @return the uuid
+     */
+    public UUID asUuid(final UuidRepresentation uuidRepresentation) {
+        if (uuidRepresentation == null) {
+            throw new IllegalArgumentException("uuidRepresentation may not be null");
+        }
+
+        final byte uuidType = uuidRepresentation == UuidRepresentation.STANDARD
+                ? BsonBinarySubType.UUID_STANDARD.getValue()
+                : BsonBinarySubType.UUID_LEGACY.getValue();
+
+        if (type != uuidType) {
+            throw new BsonInvalidOperationException("uuidRepresentation does not match current uuidRepresentation.");
+        }
+
+        return UuidHelper.decodeBinaryToUuid(this.data.clone(), this.type, uuidRepresentation);
     }
 
     @Override
