@@ -83,7 +83,6 @@ public class BsonBinary extends BsonValue {
      * Construct a Type 4 BsonBinary from the given UUID.
      *
      * @param uuid the UUID
-     *
      * @since 3.9
      */
     public BsonBinary(final UUID uuid) {
@@ -95,8 +94,6 @@ public class BsonBinary extends BsonValue {
      *
      * @param uuid the UUID
      * @param uuidRepresentation the UUID representation
-     *
-     *
      * @since 3.9
      */
     public BsonBinary(final UUID uuid, final UuidRepresentation uuidRepresentation) {
@@ -116,7 +113,6 @@ public class BsonBinary extends BsonValue {
      * Returns the binary as a UUID. The binary type must be 4.
      *
      * @return the uuid
-     *
      * @since 3.9
      */
     public UUID asUuid() {
@@ -136,7 +132,6 @@ public class BsonBinary extends BsonValue {
      *
      * @param uuidRepresentation the UUID representation
      * @return the uuid
-     *
      * @since 3.9
      */
     public UUID asUuid(final UuidRepresentation uuidRepresentation) {

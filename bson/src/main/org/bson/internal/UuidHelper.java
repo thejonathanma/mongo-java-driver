@@ -26,7 +26,6 @@ import java.util.UUID;
 /**
  * Utilities for encoding and decoding UUID into binary.
  */
-
 public final class UuidHelper {
     private static void writeLongToArrayBigEndian(final byte[] bytes, final int offset, final long x) {
         bytes[offset + 7] = (byte) (0xFFL & (x));
