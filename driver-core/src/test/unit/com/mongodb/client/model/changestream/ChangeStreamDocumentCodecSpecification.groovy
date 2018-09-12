@@ -59,7 +59,7 @@ class ChangeStreamDocumentCodecSpecification extends Specification {
         changeStreamDocument << [
                 new ChangeStreamDocument<Document>(
                         BsonDocument.parse('{token: true}'),
-                        new MongoNamespace('databaseName.collectionName'),
+                        BsonDocument.parse('{db: "databaseName", coll: "collectionName"}'),
                         Document.parse('{key: "value for fullDocument"}'),
                         new BsonDocument('_id', new BsonInt32(1)),
                         new BsonTimestamp(1234, 2),
@@ -68,7 +68,7 @@ class ChangeStreamDocumentCodecSpecification extends Specification {
                 ),
                 new ChangeStreamDocument<BsonDocument>(
                         BsonDocument.parse('{token: true}'),
-                        new MongoNamespace('databaseName.collectionName'),
+                        BsonDocument.parse('{db: "databaseName", coll: "collectionName"}'),
                         BsonDocument.parse('{key: "value for fullDocument"}'),
                         new BsonDocument('_id', new BsonInt32(2)),
                         null,

@@ -350,7 +350,7 @@ class ChangeStreamOperationSpecification extends OperationFunctionalSpecificatio
         next.getResumeToken() != null
         next.getDocumentKey() == null
         next.getFullDocument() == null
-        next.getNamespace() == helper.getNamespace()
+        next.getDatabaseName() == "JavaDriverTest"
         next.getOperationType() == OperationType.DROP_DATABASE
         next.getUpdateDescription() == null
 

@@ -17,6 +17,7 @@
 package com.mongodb.client.model.changestream;
 
 import com.mongodb.MongoNamespace;
+import com.mongodb.MongoNamespaceCodec;
 import org.bson.BsonDocument;
 import org.bson.BsonReader;
 import org.bson.BsonTimestamp;
