@@ -399,7 +399,7 @@ public final class ClusterFixture {
 
     public static boolean isStandalone() {
         return getCluster().getDescription().getType() == STANDALONE;
-    }
+}
 
     public static boolean isAuthenticated() {
         return getConnectionString().getCredential() != null;
