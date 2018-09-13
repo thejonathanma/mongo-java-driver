@@ -24,6 +24,30 @@ import spock.lang.Specification
 
 class ChangeStreamDocumentSpecification extends Specification {
 
+    def 'should initialize correctly'() {
+        given:
+        def resumeToken = RawBsonDocument.parse('{token: true}')
+        def namespace = new MongoNamespace('databaseName.collectionName')
+        def fullDocument = BsonDocument.parse('{key: "value for fullDocument"}')
+        def documentKey = BsonDocument.parse('{_id : 1}')
+        def clusterTime = new BsonTimestamp(1234, 2)
+        def operationType = OperationType.UPDATE
+        def updateDesc = new UpdateDescription(['a', 'b'], BsonDocument.parse('{c: 1}'))
+
+        when:
+        def changeStreamDocument = new ChangeStreamDocument<BsonDocument>(resumeToken, namespace, fullDocument,
+                documentKey, clusterTime, operationType, updateDesc)
+
+        then:
+        changeStreamDocument.getResumeToken() == resumeToken
+        changeStreamDocument.getFullDocument() == fullDocument
+        changeStreamDocument.getDocumentKey() == documentKey
+        changeStreamDocument.getClusterTime() == clusterTime
+        changeStreamDocument.getNamespace() == namespace
+        changeStreamDocument.getOperationType() == operationType
+        changeStreamDocument.getUpdateDescription() == updateDesc
+    }
+
     def 'should return the expected string value'() {
         given:
         def resumeToken = RawBsonDocument.parse('{token: true}')
@@ -36,8 +60,8 @@ class ChangeStreamDocumentSpecification extends Specification {
         def updateDesc = new UpdateDescription(['a', 'b'], BsonDocument.parse('{c: 1}'))
 
         when:
-        def changeStreamDocument = new ChangeStreamDocument<BsonDocument>(resumeToken, namespaceDocument, fullDocument, documentKey, clusterTime,
-                operationType, updateDesc)
+        def changeStreamDocument = new ChangeStreamDocument<BsonDocument>(resumeToken, namespaceDocument, fullDocument,
+                documentKey, clusterTime, operationType, updateDesc)
 
         then:
         changeStreamDocument.getResumeToken() == resumeToken

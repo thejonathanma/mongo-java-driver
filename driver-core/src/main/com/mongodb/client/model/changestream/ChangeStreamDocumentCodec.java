@@ -17,13 +17,13 @@
 package com.mongodb.client.model.changestream;
 
 import com.mongodb.MongoNamespace;
-import com.mongodb.MongoNamespaceCodec;
 import org.bson.BsonDocument;
 import org.bson.BsonReader;
 import org.bson.BsonTimestamp;
 import org.bson.BsonWriter;
 import org.bson.codecs.BsonDocumentCodec;
 import org.bson.codecs.BsonTimestampCodec;
+import org.bson.codecs.BsonValueCodecProvider;
 import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
@@ -60,7 +60,7 @@ final class ChangeStreamDocumentCodec<TResult> implements Codec<ChangeStreamDocu
                 .register(changeStreamDocumentClassModel)
                 .build();
 
-        CodecRegistry registry = fromRegistries(fromProviders(provider), codecRegistry);
+        CodecRegistry registry = fromRegistries(fromProviders(provider, new BsonValueCodecProvider()), codecRegistry);
         this.codec = (Codec<ChangeStreamDocument<TResult>>) (Codec<? extends ChangeStreamDocument>)
                 registry.get(ChangeStreamDocument.class);
     }

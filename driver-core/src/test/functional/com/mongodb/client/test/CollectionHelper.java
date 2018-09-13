@@ -380,6 +380,20 @@ public final class CollectionHelper<T> {
         }
     }
 
+    public void renameCollection() {
+        try {
+            new CommandWriteOperation<BsonDocument>("admin",
+                    BsonDocument.parse(
+                            String.format("{renameCollection: %s, to: %s}",
+                                    "JavaDriverTest.com.mongodb.operation.ChangeStreamOperationSpecification",
+                                    "JavaDriverTest.newCollectionName")
+                    ),
+                    new BsonDocumentCodec()).execute(getBinding());
+        } catch (MongoCommandException e) {
+            // do nothing
+        }
+    }
+
     public void runAdminCommand(final BsonDocument command) {
         new CommandWriteOperation<BsonDocument>("admin", command, new BsonDocumentCodec()).execute(getBinding());
     }
