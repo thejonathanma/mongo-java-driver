@@ -20,6 +20,7 @@ import com.mongodb.MongoNamespace;
 import com.mongodb.assertions.Assertions;
 import com.mongodb.lang.Nullable;
 import org.bson.BsonDocument;
+import org.bson.BsonString;
 import org.bson.BsonTimestamp;
 import org.bson.codecs.Codec;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -61,12 +62,12 @@ public final class ChangeStreamDocument<TDocument> {
      *                                                 UpdateDescription)}
      */
     @Deprecated
-    public ChangeStreamDocument(@BsonProperty("resumeToken") final BsonDocument resumeToken,
-                                @BsonProperty("namespace") final MongoNamespace namespace,
-                                @BsonProperty("fullDocument") final TDocument fullDocument,
-                                @BsonProperty("documentKey") final BsonDocument documentKey,
-                                @BsonProperty("operationType") final OperationType operationType,
-                                @BsonProperty("updateDescription") final UpdateDescription updateDescription) {
+    public ChangeStreamDocument(final BsonDocument resumeToken,
+                                final MongoNamespace namespace,
+                                final TDocument fullDocument,
+                                final BsonDocument documentKey,
+                                final OperationType operationType,
+                                final UpdateDescription updateDescription) {
         this(resumeToken, namespace, fullDocument, documentKey, null, operationType, updateDescription);
     }
 
@@ -82,13 +83,13 @@ public final class ChangeStreamDocument<TDocument> {
      * @param updateDescription the update description
      */
     @Deprecated
-    public ChangeStreamDocument(@BsonProperty("resumeToken") final BsonDocument resumeToken,
-                                @BsonProperty("namespace") final MongoNamespace namespace,
-                                @BsonProperty("fullDocument") final TDocument fullDocument,
-                                @BsonProperty("documentKey") final BsonDocument documentKey,
-                                @Nullable @BsonProperty("clusterTime") final BsonTimestamp clusterTime,
-                                @BsonProperty("operationType") final OperationType operationType,
-                                @BsonProperty("updateDescription") final UpdateDescription updateDescription) {
+    public ChangeStreamDocument(final BsonDocument resumeToken,
+                                final MongoNamespace namespace,
+                                final TDocument fullDocument,
+                                final BsonDocument documentKey,
+                                @Nullable final BsonTimestamp clusterTime,
+                                final OperationType operationType,
+                                final UpdateDescription updateDescription) {
         this(resumeToken, namespaceToDocument(namespace), fullDocument, documentKey,
                 clusterTime, operationType, updateDescription);
     }
@@ -103,6 +104,8 @@ public final class ChangeStreamDocument<TDocument> {
      * @param clusterTime the cluster time at which the change occured
      * @param operationType the operation type
      * @param updateDescription the update description
+     *
+     * @since 3.8
      */
     @BsonCreator
     public ChangeStreamDocument(@BsonProperty("resumeToken") final BsonDocument resumeToken,
@@ -121,11 +124,10 @@ public final class ChangeStreamDocument<TDocument> {
         this.updateDescription = updateDescription;
     }
 
-    @BsonIgnore
     private static BsonDocument namespaceToDocument(final MongoNamespace namespace) {
         Assertions.notNull("namespace", namespace);
-        return BsonDocument.parse(String.format("{db: '%s', coll: '%s'}",
-                namespace.getDatabaseName(), namespace.getCollectionName()));
+        return new BsonDocument("db", new BsonString(namespace.getDatabaseName()))
+                .append("coll", new BsonString(namespace.getCollectionName()));
     }
 
     /**
@@ -140,19 +142,31 @@ public final class ChangeStreamDocument<TDocument> {
     /**
      * Returns the namespace
      *
+     * The invalidate operation type does include a MongoNamespace in the ChangeStreamDocument response. The
+     * dropDatabase operation type includes a MongoNamespace, but does not include a collection name as part
+     * of the namespace.
+     *
      * @return the namespace
+     * @throws IllegalStateException if the namespaceDocument does not contain the 'db' or 'coll' keys
      */
     @BsonIgnore @Nullable
     public MongoNamespace getNamespace() {
-        return namespaceDocument != null
-                ? new MongoNamespace(namespaceDocument.getString("db").getValue(), namespaceDocument.getString("coll").getValue())
-                : null;
+        if (namespaceDocument == null) {
+            return null;
+        }
+        Assertions.isTrue("namespaceDocument contains 'db' key", namespaceDocument.containsKey("db"));
+        Assertions.isTrue("namespaceDocument contains 'coll' key", namespaceDocument.containsKey("coll"));
+        return new MongoNamespace(namespaceDocument.getString("db").getValue(), namespaceDocument.getString("coll").getValue());
     }
 
     /**
      * Returns the namespaceDocument
      *
+     * The namespaceDocument is a BsonDocument containing the values associated with a MongoNamespace. The
+     * 'db' key refers to the database name and the 'coll' key refers to the collection name.
+     *
      * @return the namespaceDocument
+     * @since 3.8
      */
     @BsonProperty("ns")
     public BsonDocument getNamespaceDocument() {
@@ -163,9 +177,15 @@ public final class ChangeStreamDocument<TDocument> {
      * Returns the database name
      *
      * @return the databaseName
+     * @throws IllegalStateException if the namespaceDocument does not contain the 'db' key
+     * @since 3.8
      */
-    @BsonIgnore
+    @BsonIgnore @Nullable
     public String getDatabaseName() {
+        if (namespaceDocument == null) {
+            return null;
+        }
+        Assertions.isTrue("namespaceDocument contains 'db' key", namespaceDocument.containsKey("db"));
         return namespaceDocument.getString("db").getValue();
     }
 

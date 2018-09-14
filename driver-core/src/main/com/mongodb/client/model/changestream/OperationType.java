@@ -63,7 +63,7 @@ public enum OperationType {
     DROP_DATABASE("dropDatabase"),
 
     /**
-     * The rename operation type
+     * The rename operation type for renaming collections
      *
      * @since 3.8.2
      */
