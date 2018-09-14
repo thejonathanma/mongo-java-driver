@@ -18,7 +18,6 @@ package com.mongodb.client.model.changestream
 
 import com.mongodb.MongoNamespace
 import org.bson.BsonDocument
-import org.bson.BsonString
 import org.bson.BsonTimestamp
 import org.bson.RawBsonDocument
 import spock.lang.Specification

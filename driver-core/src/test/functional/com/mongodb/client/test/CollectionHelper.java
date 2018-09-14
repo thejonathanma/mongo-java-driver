@@ -383,11 +383,9 @@ public final class CollectionHelper<T> {
     public void renameCollection() {
         try {
             new CommandWriteOperation<BsonDocument>("admin",
-                    BsonDocument.parse(
-                            String.format("{renameCollection: %s, to: %s}",
-                                    "JavaDriverTest.com.mongodb.operation.ChangeStreamOperationSpecification",
-                                    "JavaDriverTest.newCollectionName")
-                    ),
+                    new BsonDocument("renameCollection",
+                            new BsonString("JavaDriverTest.com.mongodb.operation.ChangeStreamOperationSpecification"))
+                                .append("to", new BsonString("JavaDriverTest.newCollectionName")),
                     new BsonDocumentCodec()).execute(getBinding());
         } catch (MongoCommandException e) {
             // do nothing
