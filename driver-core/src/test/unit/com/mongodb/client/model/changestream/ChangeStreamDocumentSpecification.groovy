@@ -83,7 +83,7 @@ class ChangeStreamDocumentSpecification extends Specification {
         changeStreamDocumentNullNamespace.getNamespaceDocument() == null
     }
 
-    def 'should throw exceptions on missing BsonDocument elements'() {
+    def 'should return null on missing BsonDocument elements'() {
         given:
         def resumeToken = RawBsonDocument.parse('{token: true}')
         def namespaceDocument = BsonDocument.parse('{db: "databaseName"}')
@@ -99,16 +99,11 @@ class ChangeStreamDocumentSpecification extends Specification {
         def changeStreamDocumentEmptyNamespace = new ChangeStreamDocument<BsonDocument>(resumeToken,
                 namespaceDocumentEmpty, fullDocument, documentKey, clusterTime, operationType, updateDesc)
 
-        when:
-        changeStreamDocument.getNamespace()
+        expect:
+        changeStreamDocument.getNamespace() == null
+        changeStreamDocument.getDatabaseName() == 'databaseName'
 
-        then:
-        thrown(IllegalStateException)
-
-        when:
-        changeStreamDocumentEmptyNamespace.getDatabaseName()
-
-        then:
-        thrown(IllegalStateException)
+        changeStreamDocumentEmptyNamespace.getNamespace() == null
+        changeStreamDocumentEmptyNamespace.getDatabaseName() == null
     }
 }

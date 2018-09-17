@@ -17,6 +17,7 @@
 package com.mongodb.operation
 
 import com.mongodb.MongoChangeStreamException
+import com.mongodb.MongoNamespace
 import com.mongodb.OperationFunctionalSpecification
 import com.mongodb.ReadConcern
 import com.mongodb.WriteConcern
@@ -368,11 +369,12 @@ class ChangeStreamOperationSpecification extends OperationFunctionalSpecificatio
         def pipeline = [BsonDocument.parse('{$match: {operationType: "rename"}}')]
         def operation = new ChangeStreamOperation<BsonDocument>(helper.getNamespace(), FullDocument.UPDATE_LOOKUP, pipeline,
                 ChangeStreamDocument.createCodec(BsonDocument, fromProviders(new BsonValueCodecProvider(), new ValueCodecProvider())))
+        def newNamespace = new MongoNamespace('JavaDriverTest', 'newCollectionName')
         helper.insertDocuments(BsonDocument.parse('{ _id : 2, x : 2, y : 3 }'))
 
         when:
         def cursor = execute(operation, false)
-        helper.renameCollection()
+        helper.renameCollection(newNamespace)
         ChangeStreamDocument<BsonDocument> next = next(cursor, false).get(0)
 
         then:

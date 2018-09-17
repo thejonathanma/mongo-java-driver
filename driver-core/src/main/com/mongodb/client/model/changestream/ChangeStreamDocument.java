@@ -146,16 +146,18 @@ public final class ChangeStreamDocument<TDocument> {
      * dropDatabase operation type includes a MongoNamespace, but does not include a collection name as part
      * of the namespace.
      *
-     * @return the namespace
-     * @throws IllegalStateException if the namespaceDocument does not contain the 'db' or 'coll' keys
+     * @return the namespace. If the namespaceDocument is null or if it is missing either the 'db' or 'coll' keys,
+     * then this will return null.
      */
     @BsonIgnore @Nullable
     public MongoNamespace getNamespace() {
         if (namespaceDocument == null) {
             return null;
         }
-        Assertions.isTrue("namespaceDocument contains 'db' key", namespaceDocument.containsKey("db"));
-        Assertions.isTrue("namespaceDocument contains 'coll' key", namespaceDocument.containsKey("coll"));
+        if (!namespaceDocument.containsKey("db") || !namespaceDocument.containsKey("coll")) {
+            return null;
+        }
+
         return new MongoNamespace(namespaceDocument.getString("db").getValue(), namespaceDocument.getString("coll").getValue());
     }
 
@@ -176,8 +178,8 @@ public final class ChangeStreamDocument<TDocument> {
     /**
      * Returns the database name
      *
-     * @return the databaseName
-     * @throws IllegalStateException if the namespaceDocument does not contain the 'db' key
+     * @return the databaseName. If the namespaceDocument is null or if it is missing the 'db' key, then this will
+     * return null.
      * @since 3.8
      */
     @BsonIgnore @Nullable
@@ -185,7 +187,9 @@ public final class ChangeStreamDocument<TDocument> {
         if (namespaceDocument == null) {
             return null;
         }
-        Assertions.isTrue("namespaceDocument contains 'db' key", namespaceDocument.containsKey("db"));
+        if (!namespaceDocument.containsKey("db")) {
+            return null;
+        }
         return namespaceDocument.getString("db").getValue();
     }
 

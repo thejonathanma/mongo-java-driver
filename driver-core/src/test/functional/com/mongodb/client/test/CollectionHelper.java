@@ -380,12 +380,11 @@ public final class CollectionHelper<T> {
         }
     }
 
-    public void renameCollection() {
+    public void renameCollection(final MongoNamespace newNamespace) {
         try {
             new CommandWriteOperation<BsonDocument>("admin",
-                    new BsonDocument("renameCollection",
-                            new BsonString("JavaDriverTest.com.mongodb.operation.ChangeStreamOperationSpecification"))
-                                .append("to", new BsonString("JavaDriverTest.newCollectionName")),
+                    new BsonDocument("renameCollection", new BsonString(getNamespace().getFullName()))
+                                .append("to", new BsonString(newNamespace.getFullName())),
                     new BsonDocumentCodec()).execute(getBinding());
         } catch (MongoCommandException e) {
             // do nothing
