@@ -468,10 +468,12 @@ public class JsonPoweredCrudTestHelper {
 
         if (clientSession == null) {
             getCollection(collectionOptions).insertMany(documents,
-                    new InsertManyOptions().ordered(arguments.getBoolean("ordered", BsonBoolean.TRUE).getValue()));
+                    new InsertManyOptions().ordered(arguments.getDocument("options", new BsonDocument())
+                                                        .getBoolean("ordered", BsonBoolean.TRUE).getValue()));
         } else {
             getCollection(collectionOptions).insertMany(clientSession, documents,
-                    new InsertManyOptions().ordered(arguments.getBoolean("ordered", BsonBoolean.TRUE).getValue()));
+                    new InsertManyOptions().ordered(arguments.getDocument("options", new BsonDocument())
+                                                        .getBoolean("ordered", BsonBoolean.TRUE).getValue()));
         }
 
         BsonDocument insertedIds = new BsonDocument();
@@ -605,11 +607,13 @@ public class JsonPoweredCrudTestHelper {
         if (clientSession == null) {
             bulkWriteResult = getCollection(collectionOptions)
                     .bulkWrite(writeModels, new BulkWriteOptions()
-                            .ordered(arguments.getBoolean("ordered", BsonBoolean.TRUE).getValue()));
+                            .ordered(arguments.getDocument("options", new BsonDocument())
+                                        .getBoolean("ordered", BsonBoolean.TRUE).getValue()));
         } else {
             bulkWriteResult = getCollection(collectionOptions)
                     .bulkWrite(clientSession, writeModels, new BulkWriteOptions()
-                            .ordered(arguments.getBoolean("ordered", BsonBoolean.TRUE).getValue()));
+                            .ordered(arguments.getDocument("options", new BsonDocument())
+                                        .getBoolean("ordered", BsonBoolean.TRUE).getValue()));
         }
 
         return toResult(bulkWriteResult, writeModels);
