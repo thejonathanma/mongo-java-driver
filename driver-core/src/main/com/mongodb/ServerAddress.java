@@ -189,6 +189,27 @@ public class ServerAddress implements Serializable {
         }
     }
 
+    /**
+     * Gets all underlying socket addresses
+     *
+     * @return array of socket addresses
+     */
+    public InetSocketAddress[] getSocketAddresses() {
+        try {
+            InetAddress[] inetAddresses = InetAddress.getAllByName(host);
+
+            InetSocketAddress[] inetSocketAdresses = new InetSocketAddress[inetAddresses.length];
+
+            for (int i = 0; i < inetAddresses.length; i++) {
+                inetSocketAdresses[i] = new InetSocketAddress(inetAddresses[i], port);
+            }
+
+            return inetSocketAdresses;
+        } catch (UnknownHostException e) {
+            throw new MongoSocketException(e.getMessage(), this, e);
+        }
+    }
+
     @Override
     public String toString() {
         return host + ":" + port;

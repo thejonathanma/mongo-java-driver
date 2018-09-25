@@ -30,7 +30,9 @@ import javax.net.SocketFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.List;
 
 import static com.mongodb.assertions.Assertions.notNull;
@@ -58,10 +60,21 @@ public class SocketStream implements Stream {
     @Override
     public void open() throws IOException {
         try {
-            socket = socketFactory.createSocket();
-            SocketStreamHelper.initialize(socket, address, settings, sslSettings);
-            outputStream = socket.getOutputStream();
-            inputStream = socket.getInputStream();
+            InetSocketAddress[] inetSocketAddresses = address.getSocketAddresses();
+
+            for (int i = 0; i < inetSocketAddresses.length; i++) {
+                socket = socketFactory.createSocket();
+                try {
+                    SocketStreamHelper.initialize(socket, inetSocketAddresses[i], settings, sslSettings);
+                    outputStream = socket.getOutputStream();
+                    inputStream = socket.getInputStream();
+                    break;
+                } catch (SocketTimeoutException e) {
+                    if (i == inetSocketAddresses.length - 1) {
+                        throw new SocketTimeoutException("Unable to connect to any ip addresses associated with host.");
+                    }
+                }
+            }
         } catch (IOException e) {
             close();
             throw new MongoSocketOpenException("Exception opening socket", getAddress(), e);

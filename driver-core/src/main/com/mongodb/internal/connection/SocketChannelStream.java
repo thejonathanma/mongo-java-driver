@@ -27,6 +27,8 @@ import com.mongodb.connection.Stream;
 import org.bson.ByteBuf;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.List;
@@ -53,8 +55,19 @@ public class SocketChannelStream implements Stream {
     @Override
     public void open() throws IOException {
         try {
-            socketChannel = SocketChannel.open();
-            SocketStreamHelper.initialize(socketChannel.socket(), address, settings, sslSettings);
+            InetSocketAddress[] inetSocketAddresses = address.getSocketAddresses();
+
+            for (int i = 0; i < inetSocketAddresses.length; i++) {
+                socketChannel = SocketChannel.open();
+                try {
+                    SocketStreamHelper.initialize(socketChannel.socket(), inetSocketAddresses[i], settings, sslSettings);
+                    break;
+                } catch (SocketTimeoutException e) {
+                    if (i == inetSocketAddresses.length - 1) {
+                        throw new SocketTimeoutException("Unable to connect to any ip address associated with host.");
+                    }
+                }
+            }
         } catch (IOException e) {
             close();
             throw new MongoSocketOpenException("Exception opening socket", getAddress(), e);
