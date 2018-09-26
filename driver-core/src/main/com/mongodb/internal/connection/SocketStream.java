@@ -16,6 +16,7 @@
 
 package com.mongodb.internal.connection;
 
+import com.mongodb.MongoSocketException;
 import com.mongodb.MongoSocketOpenException;
 import com.mongodb.MongoSocketReadException;
 import com.mongodb.ServerAddress;
@@ -33,6 +34,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.Iterator;
 import java.util.List;
 
 import static com.mongodb.assertions.Assertions.notNull;
@@ -57,24 +59,29 @@ public class SocketStream implements Stream {
         this.bufferProvider = notNull("bufferProvider", bufferProvider);
     }
 
-    @Override
-    public void open() throws IOException {
-        try {
-            InetSocketAddress[] inetSocketAddresses = address.getSocketAddresses();
-
-            for (int i = 0; i < inetSocketAddresses.length; i++) {
-                socket = socketFactory.createSocket();
-                try {
-                    SocketStreamHelper.initialize(socket, inetSocketAddresses[i], settings, sslSettings);
-                    outputStream = socket.getOutputStream();
-                    inputStream = socket.getInputStream();
-                    break;
-                } catch (SocketTimeoutException e) {
-                    if (i == inetSocketAddresses.length - 1) {
-                        throw new SocketTimeoutException("Unable to connect to any ip addresses associated with host.");
-                    }
+    private Socket initializeSocket() throws IOException {
+        Iterator<InetSocketAddress> inetSocketAddresses = address.getSocketAddresses().iterator();
+        while (inetSocketAddresses.hasNext()) {
+            Socket socket = socketFactory.createSocket();
+            try {
+                SocketStreamHelper.initialize(socket, inetSocketAddresses.next(), settings, sslSettings);
+                return socket;
+            } catch (SocketTimeoutException e) {
+                if (!inetSocketAddresses.hasNext()) {
+                    throw e;
                 }
             }
+        }
+
+        throw new MongoSocketException("Exception opening socket", getAddress());
+    }
+
+    @Override
+    public void open() {
+        try {
+            socket = initializeSocket();
+            outputStream = socket.getOutputStream();
+            inputStream = socket.getInputStream();
         } catch (IOException e) {
             close();
             throw new MongoSocketOpenException("Exception opening socket", getAddress(), e);

@@ -5,15 +5,21 @@ import com.mongodb.ServerAddress
 import com.mongodb.connection.BufferProvider
 import com.mongodb.connection.SocketSettings
 import com.mongodb.connection.SslSettings
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 import javax.net.SocketFactory
+import java.util.concurrent.TimeUnit
+
+import static com.mongodb.ClusterFixture.getSslSettings
 
 class SocketStreamSpecification extends Specification {
+
+    @IgnoreIf({ getSslSettings().isEnabled() })
     def 'should successfully connect with working ip address group'() {
         given:
         def port = 27017
-        def socketSettings = SocketSettings.builder().build()
+        def socketSettings = SocketSettings.builder().connectTimeout(100, TimeUnit.MILLISECONDS).build()
         def sslSettings = SslSettings.builder().build()
         def bufferProvider = Stub(BufferProvider)
 
@@ -32,6 +38,7 @@ class SocketStreamSpecification extends Specification {
         socketFactory.createSocket() >>> [socket0, socket1, socket2]
 
         def socketStream = new SocketStream(serverAddress, socketSettings, sslSettings, socketFactory, bufferProvider)
+        def socketChannelStream = new SocketChannelStream(serverAddress, socketSettings, sslSettings, bufferProvider)
 
         when:
         socketStream.open()
@@ -41,14 +48,22 @@ class SocketStreamSpecification extends Specification {
         !socket1.isConnected()
         socket2.isConnected()
 
+        when:
+        socketChannelStream.open()
+
+        then:
+        !socketChannelStream.isClosed()
+
         cleanup:
         socketStream?.close()
+        socketChannelStream?.close()
     }
 
+    @IgnoreIf({ getSslSettings().isEnabled() })
     def 'should throw exception when attempting to connect with incorrect ip address group'() {
         given:
         def port = 27017
-        def socketSettings = SocketSettings.builder().build()
+        def socketSettings = SocketSettings.builder().connectTimeout(100, TimeUnit.MILLISECONDS).build()
         def sslSettings = SslSettings.builder().build()
         def bufferProvider = Stub(BufferProvider)
         def inetAddresses = new InetSocketAddress[3]
@@ -67,6 +82,7 @@ class SocketStreamSpecification extends Specification {
         socketFactory.createSocket() >>> [socket0, socket1, socket2]
 
         def socketStream = new SocketStream(serverAddress, socketSettings, sslSettings, socketFactory, bufferProvider)
+        def socketChannelStream = new SocketChannelStream(serverAddress, socketSettings, sslSettings, bufferProvider)
 
         when:
         socketStream.open()
@@ -77,7 +93,15 @@ class SocketStreamSpecification extends Specification {
         !socket1.isConnected()
         !socket2.isConnected()
 
+        when:
+        socketChannelStream.open()
+
+        then:
+        thrown(MongoSocketOpenException)
+        socketChannelStream.isClosed()
+
         cleanup:
         socketStream?.close()
+        socketChannelStream?.close()
     }
 }

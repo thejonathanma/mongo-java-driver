@@ -23,6 +23,8 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents the location of a Mongo server - i.e. server name and port number
@@ -193,18 +195,18 @@ public class ServerAddress implements Serializable {
      * Gets all underlying socket addresses
      *
      * @return array of socket addresses
+     *
+     * @since 3.9
      */
-    public InetSocketAddress[] getSocketAddresses() {
+    public List<InetSocketAddress> getSocketAddresses() {
         try {
             InetAddress[] inetAddresses = InetAddress.getAllByName(host);
-
-            InetSocketAddress[] inetSocketAdresses = new InetSocketAddress[inetAddresses.length];
-
-            for (int i = 0; i < inetAddresses.length; i++) {
-                inetSocketAdresses[i] = new InetSocketAddress(inetAddresses[i], port);
+            List<InetSocketAddress> inetSocketAddressList = new ArrayList<InetSocketAddress>();
+            for (InetAddress inetAddress : inetAddresses) {
+                inetSocketAddressList.add(new InetSocketAddress(inetAddress, port));
             }
 
-            return inetSocketAdresses;
+            return inetSocketAddressList;
         } catch (UnknownHostException e) {
             throw new MongoSocketException(e.getMessage(), this, e);
         }

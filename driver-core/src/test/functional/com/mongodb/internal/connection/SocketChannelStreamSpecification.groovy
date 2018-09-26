@@ -5,13 +5,20 @@ import com.mongodb.ServerAddress
 import com.mongodb.connection.BufferProvider
 import com.mongodb.connection.SocketSettings
 import com.mongodb.connection.SslSettings
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
+import java.util.concurrent.TimeUnit
+
+import static com.mongodb.ClusterFixture.getSslSettings
+
 class SocketChannelStreamSpecification extends Specification {
+
+    @IgnoreIf({ getSslSettings().isEnabled() })
     def 'should successfully connect with working ip address group'() {
         given:
         def port = 27017
-        def socketSettings = SocketSettings.builder().build()
+        def socketSettings = SocketSettings.builder().connectTimeout(100, TimeUnit.MILLISECONDS).build()
         def sslSettings = SslSettings.builder().build()
         def bufferProvider = Stub(BufferProvider)
 
@@ -35,10 +42,11 @@ class SocketChannelStreamSpecification extends Specification {
         socketChannelStream?.close()
     }
 
+    @IgnoreIf({ getSslSettings().isEnabled() })
     def 'should throw exception when attempting connection with incorrect ip address group'() {
         given:
         def port = 27017
-        def socketSettings = SocketSettings.builder().build()
+        def socketSettings = SocketSettings.builder().connectTimeout(100, TimeUnit.MILLISECONDS).build()
         def sslSettings = SslSettings.builder().build()
         def bufferProvider = Stub(BufferProvider)
 

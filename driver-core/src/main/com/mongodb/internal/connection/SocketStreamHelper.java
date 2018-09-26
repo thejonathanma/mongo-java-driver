@@ -17,7 +17,6 @@
 package com.mongodb.internal.connection;
 
 import com.mongodb.MongoInternalException;
-import com.mongodb.ServerAddress;
 import com.mongodb.connection.SocketSettings;
 import com.mongodb.connection.SslSettings;
 
@@ -55,7 +54,7 @@ final class SocketStreamHelper {
                 sslParameters = new SSLParameters();
             }
 
-            enableSni(new ServerAddress(inetSocketAddress), sslParameters);
+            enableSni(inetSocketAddress.getHostName(), sslParameters);
 
             if (!sslSettings.isInvalidHostNameAllowed()) {
                 enableHostNameVerification(sslParameters);
