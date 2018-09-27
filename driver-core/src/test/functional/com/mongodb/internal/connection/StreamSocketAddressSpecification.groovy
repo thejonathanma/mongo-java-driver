@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 
 import static com.mongodb.ClusterFixture.getSslSettings
 
-class SocketStreamSpecification extends Specification {
+class StreamSocketAddressSpecification extends Specification {
 
     @IgnoreIf({ getSslSettings().isEnabled() })
     def 'should successfully connect with working ip address group'() {

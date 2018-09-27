@@ -59,6 +59,18 @@ public class SocketStream implements Stream {
         this.bufferProvider = notNull("bufferProvider", bufferProvider);
     }
 
+    @Override
+    public void open() {
+        try {
+            socket = initializeSocket();
+            outputStream = socket.getOutputStream();
+            inputStream = socket.getInputStream();
+        } catch (IOException e) {
+            close();
+            throw new MongoSocketOpenException("Exception opening socket", getAddress(), e);
+        }
+    }
+
     private Socket initializeSocket() throws IOException {
         Iterator<InetSocketAddress> inetSocketAddresses = address.getSocketAddresses().iterator();
         while (inetSocketAddresses.hasNext()) {
@@ -74,18 +86,6 @@ public class SocketStream implements Stream {
         }
 
         throw new MongoSocketException("Exception opening socket", getAddress());
-    }
-
-    @Override
-    public void open() {
-        try {
-            socket = initializeSocket();
-            outputStream = socket.getOutputStream();
-            inputStream = socket.getInputStream();
-        } catch (IOException e) {
-            close();
-            throw new MongoSocketOpenException("Exception opening socket", getAddress(), e);
-        }
     }
 
     @Override
