@@ -16,6 +16,7 @@
 
 package com.mongodb.internal.connection;
 
+import com.mongodb.MongoSocketException;
 import com.mongodb.MongoSocketOpenException;
 import com.mongodb.MongoSocketReadException;
 import com.mongodb.MongoSocketReadTimeoutException;
@@ -27,6 +28,7 @@ import com.mongodb.connection.Stream;
 import org.bson.ByteBuf;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousChannelGroup;
@@ -34,7 +36,9 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.nio.channels.InterruptedByTimeoutException;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.mongodb.assertions.Assertions.isTrue;
@@ -72,22 +76,34 @@ public final class AsynchronousSocketChannelStream implements Stream {
     @Override
     public void openAsync(final AsyncCompletionHandler<Void> handler) {
         isTrue("unopened", channel == null);
-        try {
-            channel = AsynchronousSocketChannel.open(group);
-            channel.setOption(StandardSocketOptions.TCP_NODELAY, true);
-            channel.setOption(StandardSocketOptions.SO_KEEPALIVE, settings.isKeepAlive());
-            if (settings.getReceiveBufferSize() > 0) {
-                channel.setOption(StandardSocketOptions.SO_RCVBUF, settings.getReceiveBufferSize());
-            }
-            if (settings.getSendBufferSize() > 0) {
-                channel.setOption(StandardSocketOptions.SO_SNDBUF, settings.getSendBufferSize());
-            }
+        Queue<SocketAddress> socketAddressQueue = new LinkedList<SocketAddress>(serverAddress.getSocketAddresses());
+        initializeSocketChannel(handler, socketAddressQueue);
+    }
 
-            channel.connect(serverAddress.getSocketAddress(), null, new OpenCompletionHandler(handler));
-        } catch (IOException e) {
-            handler.failed(new MongoSocketOpenException("Exception opening socket", serverAddress, e));
-        } catch (Throwable t) {
-            handler.failed(t);
+    @SuppressWarnings("deprecation")
+    private void initializeSocketChannel(final AsyncCompletionHandler<Void> handler, final Queue<SocketAddress> socketAddressQueue) {
+        if (socketAddressQueue.isEmpty()) {
+            handler.failed(new MongoSocketException("Exception opening socket", serverAddress));
+        } else {
+            SocketAddress socketAddress = socketAddressQueue.poll();
+
+            try {
+                AsynchronousSocketChannel chl = AsynchronousSocketChannel.open(group);
+                chl.setOption(StandardSocketOptions.TCP_NODELAY, true);
+                chl.setOption(StandardSocketOptions.SO_KEEPALIVE, settings.isKeepAlive());
+                if (settings.getReceiveBufferSize() > 0) {
+                    chl.setOption(StandardSocketOptions.SO_RCVBUF, settings.getReceiveBufferSize());
+                }
+                if (settings.getSendBufferSize() > 0) {
+                    chl.setOption(StandardSocketOptions.SO_SNDBUF, settings.getSendBufferSize());
+                }
+
+                chl.connect(socketAddress, null, new OpenCompletionHandler(handler, socketAddressQueue, chl));
+            } catch (IOException e) {
+                handler.failed(new MongoSocketOpenException("Exception opening socket", serverAddress, e));
+            } catch (Throwable t) {
+                handler.failed(t);
+            }
         }
     }
 
@@ -255,12 +271,19 @@ public final class AsynchronousSocketChannelStream implements Stream {
     }
 
     private class OpenCompletionHandler extends BaseCompletionHandler<Void, Void, Object> {
-        OpenCompletionHandler(final AsyncCompletionHandler<Void> handler) {
+        private final Queue<SocketAddress> socketAddressQueue;
+        private final AsynchronousSocketChannel chl;
+
+        OpenCompletionHandler(final AsyncCompletionHandler<Void> handler, final Queue<SocketAddress> socketAddressQueue,
+                              final AsynchronousSocketChannel chl) {
             super(handler);
+            this.socketAddressQueue = socketAddressQueue;
+            this.chl = chl;
         }
 
         @Override
         public void completed(final Void result, final Object attachment) {
+            channel = chl;
             AsyncCompletionHandler<Void> localHandler = getHandlerAndClear();
             localHandler.completed(null);
         }
@@ -268,10 +291,15 @@ public final class AsynchronousSocketChannelStream implements Stream {
         @Override
         public void failed(final Throwable exc, final Object attachment) {
             AsyncCompletionHandler<Void> localHandler = getHandlerAndClear();
-            if (exc instanceof IOException) {
-                localHandler.failed(new MongoSocketOpenException("Exception opening socket", getAddress(), exc));
+
+            if (socketAddressQueue.isEmpty()) {
+                if (exc instanceof IOException) {
+                    localHandler.failed(new MongoSocketOpenException("Exception opening socket", getAddress(), exc));
+                } else {
+                    localHandler.failed(exc);
+                }
             } else {
-                localHandler.failed(exc);
+                initializeSocketChannel(localHandler, socketAddressQueue);
             }
         }
     }

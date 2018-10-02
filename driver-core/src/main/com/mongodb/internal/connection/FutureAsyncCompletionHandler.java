@@ -71,5 +71,4 @@ class FutureAsyncCompletionHandler<T> implements AsyncCompletionHandler<T> {
         }
         return result;
     }
-
 }
