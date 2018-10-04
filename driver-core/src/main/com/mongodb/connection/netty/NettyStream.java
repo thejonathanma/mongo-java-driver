@@ -104,15 +104,13 @@ final class NettyStream implements Stream {
         handler.get();
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void openAsync(final AsyncCompletionHandler<Void> handler) {
-        final Queue<SocketAddress> socketAddressQueue = new LinkedList<SocketAddress>(address.getSocketAddresses());
-        initializeChannel(handler, socketAddressQueue);
+        initializeChannel(handler, new LinkedList<SocketAddress>(address.getSocketAddresses()));
     }
 
     @SuppressWarnings("deprecation")
-    public void initializeChannel(final AsyncCompletionHandler<Void> handler, final Queue<SocketAddress> socketAddressQueue) {
+    private void initializeChannel(final AsyncCompletionHandler<Void> handler, final Queue<SocketAddress> socketAddressQueue) {
         if (socketAddressQueue.isEmpty()) {
             handler.failed(new MongoSocketException("Exception opening socket", getAddress()));
         } else {
@@ -386,20 +384,20 @@ final class NettyStream implements Stream {
 
     private class OpenChannelFutureListener implements ChannelFutureListener {
         private final Queue<SocketAddress> socketAddressQueue;
-        private final ChannelFuture chlFuture;
+        private final ChannelFuture channelFuture;
         private final AsyncCompletionHandler<Void> handler;
 
-        OpenChannelFutureListener(final Queue<SocketAddress> socketAddressQueue, final ChannelFuture chlFuture,
+        OpenChannelFutureListener(final Queue<SocketAddress> socketAddressQueue, final ChannelFuture channelFuture,
                                   final AsyncCompletionHandler<Void> handler) {
             this.socketAddressQueue = socketAddressQueue;
-            this.chlFuture = chlFuture;
+            this.channelFuture = channelFuture;
             this.handler = handler;
         }
 
         @Override
         public void operationComplete(final ChannelFuture future) {
             if (future.isSuccess()) {
-                channel = chlFuture.channel();
+                channel = channelFuture.channel();
                 channel.closeFuture().addListener(new ChannelFutureListener() {
                     @Override
                     public void operationComplete(final ChannelFuture future) {

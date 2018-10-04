@@ -72,12 +72,10 @@ public final class AsynchronousSocketChannelStream implements Stream {
         handler.getOpen();
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void openAsync(final AsyncCompletionHandler<Void> handler) {
         isTrue("unopened", channel == null);
-        Queue<SocketAddress> socketAddressQueue = new LinkedList<SocketAddress>(serverAddress.getSocketAddresses());
-        initializeSocketChannel(handler, socketAddressQueue);
+        initializeSocketChannel(handler, new LinkedList<SocketAddress>(serverAddress.getSocketAddresses()));
     }
 
     @SuppressWarnings("deprecation")
@@ -88,17 +86,18 @@ public final class AsynchronousSocketChannelStream implements Stream {
             SocketAddress socketAddress = socketAddressQueue.poll();
 
             try {
-                AsynchronousSocketChannel chl = AsynchronousSocketChannel.open(group);
-                chl.setOption(StandardSocketOptions.TCP_NODELAY, true);
-                chl.setOption(StandardSocketOptions.SO_KEEPALIVE, settings.isKeepAlive());
+                AsynchronousSocketChannel attemptConnectionChannel = AsynchronousSocketChannel.open(group);
+                attemptConnectionChannel.setOption(StandardSocketOptions.TCP_NODELAY, true);
+                attemptConnectionChannel.setOption(StandardSocketOptions.SO_KEEPALIVE, settings.isKeepAlive());
                 if (settings.getReceiveBufferSize() > 0) {
-                    chl.setOption(StandardSocketOptions.SO_RCVBUF, settings.getReceiveBufferSize());
+                    attemptConnectionChannel.setOption(StandardSocketOptions.SO_RCVBUF, settings.getReceiveBufferSize());
                 }
                 if (settings.getSendBufferSize() > 0) {
-                    chl.setOption(StandardSocketOptions.SO_SNDBUF, settings.getSendBufferSize());
+                    attemptConnectionChannel.setOption(StandardSocketOptions.SO_SNDBUF, settings.getSendBufferSize());
                 }
 
-                chl.connect(socketAddress, null, new OpenCompletionHandler(handler, socketAddressQueue, chl));
+                attemptConnectionChannel.connect(socketAddress, null,
+                        new OpenCompletionHandler(handler, socketAddressQueue, attemptConnectionChannel));
             } catch (IOException e) {
                 handler.failed(new MongoSocketOpenException("Exception opening socket", serverAddress, e));
             } catch (Throwable t) {
@@ -272,18 +271,18 @@ public final class AsynchronousSocketChannelStream implements Stream {
 
     private class OpenCompletionHandler extends BaseCompletionHandler<Void, Void, Object> {
         private final Queue<SocketAddress> socketAddressQueue;
-        private final AsynchronousSocketChannel chl;
+        private final AsynchronousSocketChannel attemptConnectionChannel;
 
         OpenCompletionHandler(final AsyncCompletionHandler<Void> handler, final Queue<SocketAddress> socketAddressQueue,
-                              final AsynchronousSocketChannel chl) {
+                              final AsynchronousSocketChannel attemptConnectionChannel) {
             super(handler);
             this.socketAddressQueue = socketAddressQueue;
-            this.chl = chl;
+            this.attemptConnectionChannel = attemptConnectionChannel;
         }
 
         @Override
         public void completed(final Void result, final Object attachment) {
-            channel = chl;
+            channel = attemptConnectionChannel;
             AsyncCompletionHandler<Void> localHandler = getHandlerAndClear();
             localHandler.completed(null);
         }
