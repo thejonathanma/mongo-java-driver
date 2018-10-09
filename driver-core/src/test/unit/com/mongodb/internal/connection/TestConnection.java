@@ -126,6 +126,13 @@ class TestConnection implements Connection, AsyncConnection {
     }
 
     @Override
+    public <T> T command(final String database, final BsonDocument command, final FieldNameValidator commandFieldNameValidator,
+                         final ReadPreference readPreference, final Decoder<T> commandResultDecoder, final SessionContext sessionContext,
+                         final boolean exhaust) {
+        return executeEnqueuedCommandBasedProtocol(sessionContext);
+    }
+
+    @Override
     public <T> void commandAsync(final String database, final BsonDocument command, final boolean slaveOk,
                                  final FieldNameValidator fieldNameValidator,
                                  final Decoder<T> commandResultDecoder, final SingleResultCallback<T> callback) {

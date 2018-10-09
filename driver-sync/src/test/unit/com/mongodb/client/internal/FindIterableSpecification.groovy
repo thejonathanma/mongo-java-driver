@@ -77,6 +77,7 @@ class FindIterableSpecification extends Specification {
                 .returnKey(false)
                 .showRecordId(false)
                 .snapshot(false)
+                .exhaust(false)
 
         when: 'default input should be as expected'
         findIterable.iterator()
@@ -105,6 +106,7 @@ class FindIterableSpecification extends Specification {
                 .returnKey(false)
                 .showRecordId(false)
                 .snapshot(false)
+                .exhaust(false)
         )
         readPreference == secondary()
 
@@ -131,6 +133,7 @@ class FindIterableSpecification extends Specification {
                 .returnKey(true)
                 .showRecordId(true)
                 .snapshot(true)
+                .exhaust(true)
                 .iterator()
 
         operation = executor.getReadOperation() as FindOperation<Document>
@@ -160,6 +163,7 @@ class FindIterableSpecification extends Specification {
                 .returnKey(true)
                 .showRecordId(true)
                 .snapshot(true)
+                .exhaust(true)
         )
     }
 

@@ -160,7 +160,8 @@ final class Operations<TDocument> {
                 .maxScan(options.getMaxScan())
                 .returnKey(options.isReturnKey())
                 .showRecordId(options.isShowRecordId())
-                .snapshot(options.isSnapshot());
+                .snapshot(options.isSnapshot())
+                .exhaust(options.isExhaust());
     }
 
     <TResult> DistinctOperation<TResult> distinct(final String fieldName, final Bson filter,

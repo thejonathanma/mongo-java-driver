@@ -193,6 +193,12 @@ final class FindIterableImpl<TDocument, TResult> extends MongoIterableImpl<TResu
         return this;
     }
 
+    @Override
+    public FindIterable<TResult> exhaust(final boolean exhaust) {
+        findOptions.exhaust(exhaust);
+        return this;
+    }
+
     @Nullable
     @Override
     public TResult first() {

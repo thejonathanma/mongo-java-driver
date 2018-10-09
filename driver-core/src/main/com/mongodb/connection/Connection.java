@@ -118,6 +118,23 @@ public interface Connection extends ReferenceCounted {
                   Decoder<T> commandResultDecoder, SessionContext sessionContext);
 
     /**
+     * Executes the command, setting the exhaust boolean.
+     *
+     * @param <T>                       the type of the result
+     * @param database                  the database to execute the command in
+     * @param command                   the command document
+     * @param commandFieldNameValidator the field name validator for the command document
+     * @param readPreference            the read preference that was applied to get this connection, or null if this is a write operation
+     * @param commandResultDecoder      the decoder for the result
+     * @param sessionContext            the session context
+     * @param exhaust                   true if an exhaust cursor is expected
+     * @return the command result
+     * @since 3.9
+     */
+    <T> T command(String database, BsonDocument command, FieldNameValidator commandFieldNameValidator, ReadPreference readPreference,
+                  Decoder<T> commandResultDecoder, SessionContext sessionContext, boolean exhaust);
+
+    /**
      * Executes the command, consuming as much of the {@code SplittablePayload} as possible.
      *
      * @param <T>                       the type of the result

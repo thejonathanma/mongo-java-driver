@@ -100,6 +100,7 @@ public class InternalStreamConnection implements InternalConnection {
     private final CommandListener commandListener;
     private volatile Compressor sendCompressor;
     private volatile Map<Byte, Compressor> compressorMap;
+    private volatile boolean moreToComeSet;
 
     public InternalStreamConnection(final ServerId serverId, final StreamFactory streamFactory,
                                     final List<MongoCompressor> compressorList, final CommandListener commandListener,
@@ -250,18 +251,23 @@ public class InternalStreamConnection implements InternalConnection {
         }
 
         try {
-            sendCommandMessage(message, bsonOutput, sessionContext);
-            if (message.isResponseExpected()) {
+            if (moreToComeSet) {
                 return receiveCommandMessageResponse(message, decoder, commandEventSender, sessionContext);
             } else {
-                commandEventSender.sendSucceededEventForOneWayCommand();
-                return null;
+                sendCommandMessage(message, bsonOutput, sessionContext);
+                if (message.isResponseExpected()) {
+                    return receiveCommandMessageResponse(message, decoder, commandEventSender, sessionContext);
+                } else {
+                    commandEventSender.sendSucceededEventForOneWayCommand();
+                    return null;
+                }
             }
         } catch (RuntimeException e) {
             commandEventSender.sendFailedEvent(e);
             throw e;
         }
     }
+
     private void sendCommandMessage(final CommandMessage message,
                                     final ByteBufferBsonOutput bsonOutput, final SessionContext sessionContext) {
         try {
@@ -390,7 +396,9 @@ public class InternalStreamConnection implements InternalConnection {
     }
 
     private <T> T getCommandResult(final Decoder<T> decoder, final ResponseBuffers responseBuffers, final int messageId) {
-        T result = new ReplyMessage<T>(responseBuffers, decoder, messageId).getDocuments().get(0);
+        ReplyMessage<T> message = new ReplyMessage<T>(responseBuffers, decoder, messageId);
+        moreToComeSet = message.getReplyHeader().getOpMsgFlagBits() == 2;
+        T result = message.getDocuments().get(0);
         MongoException writeConcernBasedError = createSpecialWriteConcernException(responseBuffers, description.getServerAddress());
         if (writeConcernBasedError != null) {
             throw new MongoWriteConcernWithResponseException(writeConcernBasedError, result);

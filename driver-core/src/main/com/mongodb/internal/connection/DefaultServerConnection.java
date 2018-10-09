@@ -129,7 +129,15 @@ public class DefaultServerConnection extends AbstractReferenceCounted implements
                          final boolean responseExpected, final SplittablePayload payload,
                          final FieldNameValidator payloadFieldNameValidator) {
         return executeProtocol(new CommandProtocolImpl<T>(database, command, commandFieldNameValidator, readPreference,
-                commandResultDecoder, responseExpected, payload, payloadFieldNameValidator, clusterConnectionMode), sessionContext);
+                commandResultDecoder, responseExpected, payload, payloadFieldNameValidator, clusterConnectionMode, false), sessionContext);
+    }
+
+    @Override
+    public <T> T command(final String database, final BsonDocument command, final FieldNameValidator commandFieldNameValidator,
+                         final ReadPreference readPreference, final Decoder<T> commandResultDecoder, final SessionContext sessionContext,
+                         final boolean exhaust) {
+        return executeProtocol(new CommandProtocolImpl<T>(database, command, commandFieldNameValidator, readPreference,
+                commandResultDecoder, true, null, null, clusterConnectionMode, exhaust), sessionContext);
     }
 
     @Override

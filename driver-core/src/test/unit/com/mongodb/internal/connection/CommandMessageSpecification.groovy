@@ -53,6 +53,40 @@ class CommandMessageSpecification extends Specification {
     def command = new BsonDocument('find', new BsonString(namespace.collectionName))
     def fieldNameValidator = new NoOpFieldNameValidator()
 
+    def 'should encode command message with OP_MSG and exhaust bit set'() {
+        given:
+        def message = new CommandMessage(namespace, command, fieldNameValidator, ReadPreference.primary(),
+                MessageSettings.builder()
+                        .serverVersion(new ServerVersion(4, 1))
+                        .serverType(ServerType.STANDALONE)
+                        .build(),
+                true, null, null, ClusterConnectionMode.SINGLE).setExhaust(exhaust)
+        def output = new BasicOutputBuffer()
+        def sessionContext = Stub(SessionContext) {
+            hasSession() >> false
+            getClusterTime() >> null
+            getSessionId() >> new BsonDocument('id', new BsonBinary([1, 2, 3] as byte[]))
+            getReadConcern() >> ReadConcern.DEFAULT
+        }
+
+        when:
+        message.encode(output, sessionContext)
+
+        then:
+        def byteBuf = new ByteBufNIO(ByteBuffer.wrap(output.toByteArray()))
+        def messageHeader = new MessageHeader(byteBuf, 512)
+
+        messageHeader.opCode == OpCode.OP_MSG.value
+
+        def replyHeader = new ReplyHeader(byteBuf, messageHeader)
+
+        replyHeader.opMsgFlagBits == result
+
+        where:
+        exhaust << [true, false]
+        result << [1 << 16, 0]
+    }
+
     def 'should encode command message with OP_MSG when server version is >= 3.6'() {
         given:
         def message = new CommandMessage(namespace, command, fieldNameValidator, readPreference,

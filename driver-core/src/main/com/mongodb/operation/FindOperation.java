@@ -61,6 +61,7 @@ import static com.mongodb.assertions.Assertions.isTrueArgument;
 import static com.mongodb.assertions.Assertions.notNull;
 import static com.mongodb.connection.ServerType.SHARD_ROUTER;
 import static com.mongodb.internal.async.ErrorHandlingResultCallback.errorHandlingCallback;
+import static com.mongodb.internal.operation.ServerVersionHelper.serverIsAtLeastVersionFourDotOne;
 import static com.mongodb.internal.operation.ServerVersionHelper.serverIsAtLeastVersionThreeDotTwo;
 import static com.mongodb.operation.CommandOperationHelper.CommandTransformer;
 import static com.mongodb.operation.CommandOperationHelper.executeWrappedCommandProtocol;
@@ -109,6 +110,7 @@ public class FindOperation<T> implements AsyncReadOperation<AsyncBatchCursor<T>>
     private boolean returnKey;
     private boolean showRecordId;
     private boolean snapshot;
+    private boolean exhaust;
 
     /**
      * Construct a new instance.
@@ -691,6 +693,32 @@ public class FindOperation<T> implements AsyncReadOperation<AsyncBatchCursor<T>>
         return this;
     }
 
+    /**
+     * Returns the exhaust.
+     *
+     * Determines whether the returned cursor from operation execution will be an exhaust cursor.
+     *
+     * @return the exhaust
+     * @since 3.9
+     */
+    public boolean isExhaust() {
+        return exhaust;
+    }
+
+    /**
+     * Sets the exhaust.
+     *
+     * If true, then the returned cursor will be an exhaust cursor following the execution of the operation.
+     *
+     * @param exhaust the exhaust
+     * @return this
+     * @since 3.9
+     */
+    public FindOperation<T> exhaust(final boolean exhaust) {
+        this.exhaust = exhaust;
+        return this;
+    }
+
     @Override
     public BatchCursor<T> execute(final ReadBinding binding) {
         return withConnection(binding, new CallableWithConnectionAndSource<BatchCursor<T>>() {
@@ -1087,13 +1115,25 @@ public class FindOperation<T> implements AsyncReadOperation<AsyncBatchCursor<T>>
 
     private CommandTransformer<BsonDocument, BatchCursor<T>> transformer(final ConnectionSource source,
                                                                          final Connection connection) {
-        return new CommandTransformer<BsonDocument, BatchCursor<T>>() {
-            @Override
-            public BatchCursor<T> apply(final BsonDocument result, final ServerAddress serverAddress) {
-                QueryResult<T> queryResult = documentToQueryResult(result, serverAddress);
-                return new QueryBatchCursor<T>(queryResult, limit, batchSize, getMaxTimeForCursor(), decoder, source, connection);
-            }
-        };
+        if (serverIsAtLeastVersionFourDotOne(connection.getDescription())) {
+            return new CommandTransformer<BsonDocument, BatchCursor<T>>() {
+                @Override
+                public BatchCursor<T> apply(final BsonDocument result, final ServerAddress serverAddress) {
+                    QueryResult<T> queryResult = documentToQueryResult(result, serverAddress);
+                    return new QueryBatchCursor<T>(queryResult, limit, batchSize, getMaxTimeForCursor(), decoder, source,
+                            connection, exhaust);
+                }
+            };
+        } else {
+            return new CommandTransformer<BsonDocument, BatchCursor<T>>() {
+                @Override
+                public BatchCursor<T> apply(final BsonDocument result, final ServerAddress serverAddress) {
+                    QueryResult<T> queryResult = documentToQueryResult(result, serverAddress);
+                    return new QueryBatchCursor<T>(queryResult, limit, batchSize, getMaxTimeForCursor(), decoder, source, connection);
+                }
+            };
+        }
+
     }
 
     private long getMaxTimeForCursor() {

@@ -63,6 +63,7 @@ public final class CommandMessage extends RequestMessage {
     private final FieldNameValidator payloadFieldNameValidator;
     private final boolean responseExpected;
     private final ClusterConnectionMode clusterConnectionMode;
+    private volatile boolean exhaust;
 
     CommandMessage(final MongoNamespace namespace, final BsonDocument command, final FieldNameValidator commandFieldNameValidator,
                    final ReadPreference readPreference, final MessageSettings settings) {
@@ -184,7 +185,9 @@ public final class CommandMessage extends RequestMessage {
     }
 
     private int getOpMsgResponseExpectedFlagBit() {
-        if (requireOpMsgResponse()) {
+        if (exhaust) {
+            return 1 << 16;
+        } else if (requireOpMsgResponse()) {
             return 0;
         } else {
             return 1 << 1;
@@ -272,6 +275,11 @@ public final class CommandMessage extends RequestMessage {
 
     private static boolean isServerVersionAtLeastThreeDotSix(final MessageSettings settings) {
         return settings.getServerVersion().compareTo(new ServerVersion(3, 6)) >= 0;
+    }
+
+    public CommandMessage setExhaust(final boolean exhaust) {
+        this.exhaust = exhaust;
+        return this;
     }
 
 }

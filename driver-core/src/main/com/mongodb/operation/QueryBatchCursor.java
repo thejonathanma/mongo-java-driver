@@ -40,6 +40,7 @@ import java.util.NoSuchElementException;
 
 import static com.mongodb.assertions.Assertions.isTrueArgument;
 import static com.mongodb.assertions.Assertions.notNull;
+import static com.mongodb.internal.operation.ServerVersionHelper.serverIsAtLeastVersionFourDotOne;
 import static com.mongodb.operation.CursorHelper.getNumberToReturn;
 import static com.mongodb.operation.OperationHelper.getMoreCursorDocumentToQueryResult;
 import static com.mongodb.internal.operation.ServerVersionHelper.serverIsAtLeastVersionThreeDotTwo;
@@ -59,6 +60,8 @@ class QueryBatchCursor<T> implements BatchCursor<T> {
     private List<T> nextBatch;
     private int count;
     private volatile boolean closed;
+    private volatile boolean exhaust;
+    private Connection exhaustConnection;
 
     QueryBatchCursor(final QueryResult<T> firstQueryResult, final int limit, final int batchSize, final Decoder<T> decoder) {
         this(firstQueryResult, limit, batchSize, decoder, null);
@@ -71,6 +74,12 @@ class QueryBatchCursor<T> implements BatchCursor<T> {
 
     QueryBatchCursor(final QueryResult<T> firstQueryResult, final int limit, final int batchSize, final long maxTimeMS,
                      final Decoder<T> decoder, final ConnectionSource connectionSource, final Connection connection) {
+        this(firstQueryResult, limit, batchSize, maxTimeMS, decoder, connectionSource, connection, false);
+    }
+
+    QueryBatchCursor(final QueryResult<T> firstQueryResult, final int limit, final int batchSize, final long maxTimeMS,
+                     final Decoder<T> decoder, final ConnectionSource connectionSource, final Connection connection,
+                     final boolean exhaust) {
         isTrueArgument("maxTimeMS >= 0", maxTimeMS >= 0);
         this.maxTimeMS = maxTimeMS;
         this.namespace = firstQueryResult.getNamespace();
@@ -78,6 +87,7 @@ class QueryBatchCursor<T> implements BatchCursor<T> {
         this.limit = limit;
         this.batchSize = batchSize;
         this.decoder = notNull("decoder", decoder);
+        this.exhaust = exhaust;
         if (firstQueryResult.getCursor() != null) {
             notNull("connectionSource", connectionSource);
         }
@@ -96,7 +106,6 @@ class QueryBatchCursor<T> implements BatchCursor<T> {
             this.connectionSource = null;
         }
     }
-
     @Override
     public boolean hasNext() {
         if (closed) {
@@ -216,32 +225,54 @@ class QueryBatchCursor<T> implements BatchCursor<T> {
 
     private void getMore() {
         Connection connection = connectionSource.getConnection();
-        try {
-            if (serverIsAtLeastVersionThreeDotTwo(connection.getDescription())) {
-                try {
-                    initFromCommandResult(connection.command(namespace.getDatabaseName(),
-                                                             asGetMoreCommandDocument(),
-                                                             NO_OP_FIELD_NAME_VALIDATOR,
-                                                             ReadPreference.primary(),
-                                                             CommandResultDocumentCodec.create(decoder, "nextBatch"),
-                                                             connectionSource.getSessionContext()));
-                } catch (MongoCommandException e) {
-                    throw translateCommandException(e, serverCursor);
+        if (exhaust && serverIsAtLeastVersionFourDotOne(connection.getDescription())) {
+            if (exhaustConnection == null) {
+                exhaustConnection = connection;
+            }
+
+            try {
+                getMoreHelper(exhaustConnection);
+            } finally {
+                if (serverCursor == null) {
+                    this.exhaustConnection.release();
+                    this.exhaustConnection = null;
                 }
-            } else {
-                QueryResult<T> getMore = connection.getMore(namespace, serverCursor.getId(),
-                        getNumberToReturn(limit, batchSize, count), decoder);
-                initFromQueryResult(getMore);
             }
-            if (limitReached()) {
-                killCursor(connection);
+        } else {
+            try {
+                getMoreHelper(connection);
+            } finally {
+                connection.release();
             }
-            if (serverCursor == null) {
-                this.connectionSource.release();
-                this.connectionSource = null;
+        }
+    }
+
+    private void getMoreHelper(final Connection connection) {
+        if (serverIsAtLeastVersionThreeDotTwo(connection.getDescription())) {
+            try {
+                initFromCommandResult(connection.command(namespace.getDatabaseName(),
+                        asGetMoreCommandDocument(),
+                        NO_OP_FIELD_NAME_VALIDATOR,
+                        ReadPreference.primary(),
+                        CommandResultDocumentCodec.create(decoder, "nextBatch"),
+                        connectionSource.getSessionContext(),
+                        exhaust));
+            } catch (MongoCommandException e) {
+                throw translateCommandException(e, serverCursor);
             }
-        } finally {
-            connection.release();
+        } else {
+            QueryResult<T> getMore = connection.getMore(namespace, serverCursor.getId(),
+                    getNumberToReturn(limit, batchSize, count), decoder);
+            initFromQueryResult(getMore);
+        }
+
+        if (limitReached()) {
+            killCursor(connection);
+        }
+
+        if (serverCursor == null) {
+            this.connectionSource.release();
+            this.connectionSource = null;
         }
     }
 

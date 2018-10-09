@@ -96,6 +96,7 @@ class FindOperationSpecification extends OperationFunctionalSpecification {
         !operation.isOplogReplay()
         !operation.isPartial()
         !operation.isSlaveOk()
+        !operation.isExhaust()
     }
 
     def 'should set optional values correctly'() {
@@ -120,6 +121,7 @@ class FindOperationSpecification extends OperationFunctionalSpecification {
                 .slaveOk(true)
                 .oplogReplay(true)
                 .noCursorTimeout(true)
+                .exhaust(true)
 
         then:
         operation.getFilter() == filter
@@ -135,6 +137,7 @@ class FindOperationSpecification extends OperationFunctionalSpecification {
         operation.isOplogReplay()
         operation.isPartial()
         operation.isSlaveOk()
+        operation.isExhaust()
     }
 
     def 'should query with default values'() {
@@ -142,6 +145,22 @@ class FindOperationSpecification extends OperationFunctionalSpecification {
         def document = new Document('_id', 1)
         getCollectionHelper().insertDocuments(new DocumentCodec(), document);
         def operation = new FindOperation<Document>(getNamespace(), new DocumentCodec())
+
+        when:
+        def results = executeAndCollectBatchCursorResults(operation, async)
+
+        then:
+        results == [document]
+
+        where:
+        async << [true, false]
+    }
+
+    def 'should query with exhaust set'() {
+        given:
+        def document = new Document('_id', 1)
+        getCollectionHelper().insertDocuments(new DocumentCodec(), document)
+        def operation = new FindOperation<Document>(getNamespace(), new DocumentCodec()).exhaust(true)
 
         when:
         def results = executeAndCollectBatchCursorResults(operation, async)

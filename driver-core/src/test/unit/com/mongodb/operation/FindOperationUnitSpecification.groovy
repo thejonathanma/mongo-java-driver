@@ -177,6 +177,7 @@ class FindOperationUnitSpecification extends OperationUnitSpecification {
                 .returnKey(true)
                 .showRecordId(true)
                 .snapshot(true)
+                .exhaust(exhaust)
 
         expectedCommand.append('filter', operation.getFilter())
                 .append('projection', operation.getProjection())
@@ -218,6 +219,7 @@ class FindOperationUnitSpecification extends OperationUnitSpecification {
         commandLimit << [100, 100, 10, null, 100, 100, 100, 10, null, 100]
         commandBatchSize << [10, null, null, 10, null, 10, null, null, 10, null]
         commandSingleBatch << [null, true, true, null, null, null, true, true, null, null]
+        exhaust << [true, false, true, false, true, false, true, false, true, false]
     }
 
     def 'should use the ReadBindings readPreference to set slaveOK'() {

@@ -190,8 +190,12 @@ public final class ReplyHeader {
         return (responseFlags & QUERY_FAILURE_RESPONSE_FLAG) == QUERY_FAILURE_RESPONSE_FLAG;
     }
 
-    // for unit testing
-    int getOpMsgFlagBits() {
+    /**
+     * Gets the OP_MSG flagbit value.
+     *
+     * @return the OP_MSG flagbit
+     */
+    public int getOpMsgFlagBits() {
         return opMsgFlagBits;
     }
 }
