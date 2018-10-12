@@ -92,7 +92,7 @@ class QueryBatchCursor<T> implements BatchCursor<T> {
         }
         if (connectionSource != null) {
             this.connectionSource = connectionSource.retain();
-            this.isExhaust = exhaust && canConnectionBeExhaust();
+            this.isExhaust = exhaust && canConnectionBeExhaust(connection);
         } else {
             this.connectionSource = null;
             this.isExhaust = false;
@@ -108,10 +108,9 @@ class QueryBatchCursor<T> implements BatchCursor<T> {
         }
     }
 
-    private boolean canConnectionBeExhaust() {
-        Connection connection = connectionSource.getConnection();
+    private boolean canConnectionBeExhaust(final Connection connection) {
         if (serverIsAtLeastVersionFourDotOne(connection.getDescription())) {
-            exhaustConnection = connection;
+            exhaustConnection = connection.retain();
             return true;
         }
 

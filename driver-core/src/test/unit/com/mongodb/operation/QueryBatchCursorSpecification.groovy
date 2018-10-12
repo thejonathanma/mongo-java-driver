@@ -32,8 +32,10 @@ import org.bson.BsonString
 import org.bson.Document
 import org.bson.codecs.BsonDocumentCodec
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class QueryBatchCursorSpecification extends Specification {
+    @Unroll
     def 'should generate expected command and release connection with batchSize, maxTimeMS, and exhaust'() {
         given:
         def connection = Mock(Connection) {
@@ -41,6 +43,8 @@ class QueryBatchCursorSpecification extends Specification {
                 getServerVersion() >> serverVersion
             }
         }
+        connection.retain() >> connection
+
         def connectionSource = Stub(ConnectionSource) {
             _ * getConnection() >> { connection }
         }

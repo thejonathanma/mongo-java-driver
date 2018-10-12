@@ -567,7 +567,9 @@ class QueryBatchCursorFunctionalSpecification extends OperationFunctionalSpecifi
         def stubConnectionSource = Stub(ConnectionSource)
         stubConnectionSource.getConnection() >> exhaustConnection
 
-        def cursor = new QueryBatchCursor<Document>(firstBatch, 5, 2, 0, new DocumentCodec(), stubConnectionSource, null, true)
+        def connection = connectionSource.getConnection()
+
+        def cursor = new QueryBatchCursor<Document>(firstBatch, 5, 2, 0, new DocumentCodec(), stubConnectionSource, connection, true)
 
         when:
         cursor.hasNext()
@@ -578,34 +580,44 @@ class QueryBatchCursorFunctionalSpecification extends OperationFunctionalSpecifi
         cleanup:
         stubConnectionSource?.release()
         exhaustConnection?.release()
+        connection?.release()
     }
 
     def 'should follow limit when exhaust set'() {
         given:
         def firstBatch = executeQuery(2)
+        def connection = connectionSource.getConnection()
 
         when:
-        def cursor = new QueryBatchCursor<Document>(firstBatch, 5, 3, 0, new DocumentCodec(), connectionSource, null, true)
+        def cursor = new QueryBatchCursor<Document>(firstBatch, 5, 3, 0, new DocumentCodec(), connectionSource, connection, true)
 
         then:
         cursor.iterator().sum { it.size } == 5
+
+        cleanup:
+        connection?.release()
     }
 
     def 'should exhaust cursor when exhaust is set'() {
         given:
         def firstBatch = executeQuery(3)
+        def connection = connectionSource.getConnection()
 
         when:
-        def cursor = new QueryBatchCursor<Document>(firstBatch, 10, 2, 0, new DocumentCodec(), connectionSource, null, true)
+        def cursor = new QueryBatchCursor<Document>(firstBatch, 10, 2, 0, new DocumentCodec(), connectionSource, connection, true)
 
         then:
         cursor.iterator().sum { it.size } == 10
+
+        cleanup:
+        connection?.release()
     }
 
     def 'should release connection source if limit is reached on get more when exhaust set'() throws InterruptedException {
         given:
         def firstBatch = executeQuery(3)
-        def cursor = new QueryBatchCursor<Document>(firstBatch, 5, 3, 0, new DocumentCodec(), connectionSource, null, true)
+        def connection = connectionSource.getConnection()
+        def cursor = new QueryBatchCursor<Document>(firstBatch, 5, 3, 0, new DocumentCodec(), connectionSource, connection, true)
 
         when:
         cursor.next()
@@ -613,6 +625,9 @@ class QueryBatchCursorFunctionalSpecification extends OperationFunctionalSpecifi
 
         then:
         checkReferenceCountReachesTarget(connectionSource, 1)
+
+        cleanup:
+        connection?.release()
     }
 
     private QueryResult<Document> executeQuery() {
