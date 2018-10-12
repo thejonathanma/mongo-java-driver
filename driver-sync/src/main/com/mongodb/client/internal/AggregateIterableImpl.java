@@ -54,6 +54,7 @@ class AggregateIterableImpl<TDocument, TResult> extends MongoIterableImpl<TResul
     private Collation collation;
     private String comment;
     private Bson hint;
+    private boolean exhaust;
 
     AggregateIterableImpl(@Nullable final ClientSession clientSession, final MongoNamespace namespace, final Class<TDocument> documentClass,
                           final Class<TResult> resultClass, final CodecRegistry codecRegistry, final ReadPreference readPreference,
@@ -137,6 +138,12 @@ class AggregateIterableImpl<TDocument, TResult> extends MongoIterableImpl<TResul
     }
 
     @Override
+    public AggregateIterable<TResult> exhaust(final boolean exhaust) {
+        this.exhaust = exhaust;
+        return this;
+    }
+
+    @Override
     @SuppressWarnings("deprecation")
     public ReadOperation<BatchCursor<TResult>> asReadOperation() {
         BsonValue outCollection = getOutCollection();
@@ -145,7 +152,7 @@ class AggregateIterableImpl<TDocument, TResult> extends MongoIterableImpl<TResul
             getExecutor().execute(operations.aggregateToCollection(pipeline, maxTimeMS, allowDiskUse, bypassDocumentValidation, collation,
                     hint, comment), getReadConcern(), getClientSession());
 
-            FindOptions findOptions = new FindOptions().collation(collation);
+            FindOptions findOptions = new FindOptions().collation(collation).exhaust(exhaust);
             Integer batchSize = getBatchSize();
             if (batchSize != null) {
                 findOptions.batchSize(batchSize);
@@ -154,7 +161,7 @@ class AggregateIterableImpl<TDocument, TResult> extends MongoIterableImpl<TResul
                     resultClass, findOptions);
         } else {
             return operations.aggregate(pipeline, resultClass, maxTimeMS, maxAwaitTimeMS, getBatchSize(), collation,
-                    hint, comment, allowDiskUse, useCursor);
+                    hint, comment, allowDiskUse, useCursor, exhaust);
         }
     }
 

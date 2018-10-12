@@ -60,7 +60,7 @@ class CommandMessageSpecification extends Specification {
                         .serverVersion(new ServerVersion(4, 1))
                         .serverType(ServerType.STANDALONE)
                         .build(),
-                true, null, null, ClusterConnectionMode.SINGLE).setExhaust(exhaust)
+                true, null, null, ClusterConnectionMode.SINGLE, exhaust)
         def output = new BasicOutputBuffer()
         def sessionContext = Stub(SessionContext) {
             hasSession() >> false

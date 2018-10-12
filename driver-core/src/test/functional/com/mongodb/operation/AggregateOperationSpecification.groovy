@@ -90,6 +90,7 @@ class AggregateOperationSpecification extends OperationFunctionalSpecification {
         operation.getMaxTime(MILLISECONDS) == 0
         operation.getPipeline() == []
         operation.getUseCursor() == null
+        !operation.getExhaust()
     }
 
     def 'should set optional values correctly'(){
@@ -105,6 +106,7 @@ class AggregateOperationSpecification extends OperationFunctionalSpecification {
                 .maxAwaitTime(10, MILLISECONDS)
                 .maxTime(10, MILLISECONDS)
                 .useCursor(true)
+                .exhaust(true)
 
         then:
         operation.getAllowDiskUse()
@@ -114,6 +116,7 @@ class AggregateOperationSpecification extends OperationFunctionalSpecification {
         operation.getMaxTime(MILLISECONDS) == 10
         operation.getUseCursor()
         operation.getHint() == hint
+        operation.getExhaust()
     }
 
     def 'should throw when using invalid hint'() {
@@ -150,6 +153,7 @@ class AggregateOperationSpecification extends OperationFunctionalSpecification {
                 .maxAwaitTime(15, MILLISECONDS)
                 .maxTime(10, MILLISECONDS)
                 .useCursor(true)
+                .exhaust(true)
 
         def expectedCommand = new BsonDocument('aggregate', new BsonString(helper.namespace.getCollectionName()))
                 .append('pipeline', new BsonArray(pipeline))

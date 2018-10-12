@@ -110,6 +110,6 @@ class CommandProtocolImpl<T> implements CommandProtocol<T> {
     private CommandMessage getCommandMessage(final InternalConnection connection) {
         return new CommandMessage(namespace, command, commandFieldNameValidator, readPreference,
                     getMessageSettings(connection.getDescription()), responseExpected, payload,
-                payloadFieldNameValidator, clusterConnectionMode).setExhaust(exhaust);
+                payloadFieldNameValidator, clusterConnectionMode, exhaust);
     }
 }

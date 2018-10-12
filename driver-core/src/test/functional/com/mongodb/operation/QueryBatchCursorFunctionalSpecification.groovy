@@ -591,11 +591,21 @@ class QueryBatchCursorFunctionalSpecification extends OperationFunctionalSpecifi
         cursor.iterator().sum { it.size } == 5
     }
 
-    def 'should release connection source if limit is reached on get more when exhaust set'() throws InterruptedException {
+    def 'should exhaust cursor when exhaust is set'() {
         given:
         def firstBatch = executeQuery(3)
 
-        cursor = new QueryBatchCursor<Document>(firstBatch, 5, 3, 0, new DocumentCodec(), connectionSource, null, true)
+        when:
+        def cursor = new QueryBatchCursor<Document>(firstBatch, 10, 2, 0, new DocumentCodec(), connectionSource, null, true)
+
+        then:
+        cursor.iterator().sum { it.size } == 10
+    }
+
+    def 'should release connection source if limit is reached on get more when exhaust set'() throws InterruptedException {
+        given:
+        def firstBatch = executeQuery(3)
+        def cursor = new QueryBatchCursor<Document>(firstBatch, 5, 3, 0, new DocumentCodec(), connectionSource, null, true)
 
         when:
         cursor.next()

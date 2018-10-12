@@ -79,6 +79,7 @@ class AggregateOperationImpl<T> implements AsyncReadOperation<AsyncBatchCursor<T
     private long maxAwaitTimeMS;
     private long maxTimeMS;
     private Boolean useCursor;
+    private boolean exhaust;
 
     AggregateOperationImpl(final MongoNamespace namespace, final List<BsonDocument> pipeline, final Decoder<T> decoder) {
         this(namespace, pipeline, decoder, defaultAggregateTarget(namespace.getCollectionName()), defaultPipelineCreator(pipeline));
@@ -184,6 +185,15 @@ class AggregateOperationImpl<T> implements AsyncReadOperation<AsyncBatchCursor<T
         return this;
     }
 
+    Boolean getExhaust() {
+        return exhaust;
+    }
+
+    AggregateOperationImpl<T> exhaust(final boolean exhaust) {
+        this.exhaust = exhaust;
+        return this;
+    }
+
     @Override
     public BatchCursor<T> execute(final ReadBinding binding) {
         return withConnection(binding, new CallableWithConnectionAndSource<BatchCursor<T>>() {
@@ -278,7 +288,7 @@ class AggregateOperationImpl<T> implements AsyncReadOperation<AsyncBatchCursor<T
             public BatchCursor<T> apply(final BsonDocument result, final ServerAddress serverAddress) {
                 QueryResult<T> queryResult = createQueryResult(result, connection.getDescription());
                 return new QueryBatchCursor<T>(queryResult, 0, batchSize != null ? batchSize : 0, maxAwaitTimeMS, decoder, source,
-                        connection);
+                        connection, exhaust);
             }
         };
     }

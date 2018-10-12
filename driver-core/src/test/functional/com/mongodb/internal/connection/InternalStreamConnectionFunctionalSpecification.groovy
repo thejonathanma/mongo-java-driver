@@ -37,40 +37,7 @@ class InternalStreamConnectionFunctionalSpecification extends OperationFunctiona
     def findCommand = new BsonDocument('find', new BsonString(getCollectionName())).append('batchSize', new BsonInt32(1))
     def findMessage = new CommandMessage(namespace, findCommand, fieldNameValidator, ReadPreference.primary(),
             MessageSettings.builder().serverVersion(new ServerVersion([4, 1, 3])).serverType(ServerType.STANDALONE).build(),
-            true, null, null, ClusterConnectionMode.SINGLE).setExhaust(false)
-
-    @IgnoreIf({ !serverVersionAtLeast([4, 1, 3]) })
-    def 'should respond with moreToCome flagbit set'() {
-        given:
-        def collectionHelper = getCollectionHelper()
-
-        collectionHelper.insertDocuments([
-                new BsonDocument('x', new BsonInt32(0)),
-                new BsonDocument('x', new BsonInt32(1)),
-                new BsonDocument('x', new BsonInt32(2))
-        ])
-
-        connection.open()
-        def findResult = connection.sendAndReceive(findMessage, new BsonDocumentCodec(), sessionContext)
-
-        when:
-        def getMoreCommand = new BsonDocument('getMore', findResult.getDocument('cursor').getInt64('id'))
-                .append('collection', new BsonString(getCollectionName()))
-                .append('batchSize', new BsonInt32(1))
-        def getMoreMessage = new CommandMessage(namespace, getMoreCommand, fieldNameValidator, ReadPreference.primary(),
-                MessageSettings.builder().serverVersion(new ServerVersion([4, 1, 3])).serverType(ServerType.STANDALONE).build(),
-                true, null, null, ClusterConnectionMode.SINGLE).setExhaust(true)
-
-        def bsonOutput = new ByteBufferBsonOutput(connection)
-
-        getMoreMessage.encode(bsonOutput, sessionContext)
-        connection.sendMessage(bsonOutput.getByteBuffers(), getMoreMessage.getId())
-
-        def response = connection.receiveMessage(getMoreMessage.getId())
-
-        then:
-        response.getReplyHeader().getOpMsgFlagBits() == 2
-    }
+            true, null, null, ClusterConnectionMode.SINGLE)
 
     @IgnoreIf({ !serverVersionAtLeast([4, 1, 3]) })
     def 'should call sendMessage only once when exhaust is set'() {
@@ -88,7 +55,7 @@ class InternalStreamConnectionFunctionalSpecification extends OperationFunctiona
                                  new TestCommandListener(), new InternalStreamConnectionInitializer([], null, [])])
         connectionSpy.open()
 
-        def findResult = connectionSpy.sendAndReceive(findMessage, new BsonDocumentCodec(), sessionContext)
+        BsonDocument findResult = connectionSpy.sendAndReceive(findMessage, new BsonDocumentCodec(), sessionContext)
         def bsonOutput = new ByteBufferBsonOutput(connectionSpy)
 
         def getMoreCommand = new BsonDocument('getMore', findResult.getDocument('cursor').getInt64('id'))
@@ -96,7 +63,7 @@ class InternalStreamConnectionFunctionalSpecification extends OperationFunctiona
                 .append('batchSize', new BsonInt32(1))
         def getMoreMessage = new CommandMessage(namespace, getMoreCommand, fieldNameValidator, ReadPreference.primary(),
                 MessageSettings.builder().serverVersion(new ServerVersion([4, 1, 3])).serverType(ServerType.STANDALONE).build(),
-                true, null, null, ClusterConnectionMode.SINGLE).setExhaust(true)
+                true, null, null, ClusterConnectionMode.SINGLE, true)
 
         getMoreMessage.encode(bsonOutput, sessionContext)
 
@@ -107,5 +74,8 @@ class InternalStreamConnectionFunctionalSpecification extends OperationFunctiona
 
         then:
         1 * connectionSpy.sendMessage(*_)
+
+        cleanup:
+        connection?.close()
     }
 }

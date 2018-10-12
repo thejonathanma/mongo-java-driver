@@ -176,10 +176,19 @@ final class Operations<TDocument> {
 
     @SuppressWarnings("deprecation")
     <TResult> AggregateOperation<TResult> aggregate(final List<? extends Bson> pipeline, final Class<TResult> resultClass,
-                                                           final long maxTimeMS, final long maxAwaitTimeMS, final Integer batchSize,
-                                                           final Collation collation,
-                                                           final Bson hint, final String comment, final Boolean allowDiskUse,
-                                                           final Boolean useCursor) {
+                                                            final long maxTimeMS, final long maxAwaitTimeMS, final Integer batchSize,
+                                                            final Collation collation, final Bson hint, final String comment,
+                                                            final Boolean allowDiskUse, final Boolean useCursor) {
+        return aggregate(pipeline, resultClass, maxTimeMS, maxAwaitTimeMS, batchSize, collation, hint, comment, allowDiskUse,
+                    useCursor, false);
+    }
+
+    @SuppressWarnings("deprecation")
+    <TResult> AggregateOperation<TResult> aggregate(final List<? extends Bson> pipeline, final Class<TResult> resultClass,
+                                                            final long maxTimeMS, final long maxAwaitTimeMS, final Integer batchSize,
+                                                            final Collation collation, final Bson hint, final String comment,
+                                                            final Boolean allowDiskUse, final Boolean useCursor,
+                                                            final boolean exhaust) {
         return new AggregateOperation<TResult>(namespace, toBsonDocumentList(pipeline), codecRegistry.get(resultClass))
                 .maxTime(maxTimeMS, MILLISECONDS)
                 .maxAwaitTime(maxAwaitTimeMS, MILLISECONDS)
@@ -188,7 +197,8 @@ final class Operations<TDocument> {
                 .useCursor(useCursor)
                 .collation(collation)
                 .hint(hint == null ? null : hint.toBsonDocument(documentClass, codecRegistry))
-                .comment(comment);
+                .comment(comment)
+                .exhaust(exhaust);
 
     }
 

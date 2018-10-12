@@ -80,6 +80,7 @@ class AggregateIterableSpecification extends Specification {
                 .collation(collation)
                 .hint(new Document('a', 1))
                 .comment('this is a comment')
+                .exhaust(true)
                 .iterator()
 
         operation = executor.getReadOperation() as AggregateOperation<Document>
@@ -92,7 +93,8 @@ class AggregateIterableSpecification extends Specification {
                 .comment('this is a comment')
                 .maxAwaitTime(99, MILLISECONDS)
                 .maxTime(999, MILLISECONDS)
-                .useCursor(true))
+                .useCursor(true)
+                .exhaust(true))
     }
 
     def 'should build the expected AggregateToCollectionOperation'() {
@@ -111,7 +113,8 @@ class AggregateIterableSpecification extends Specification {
                 .useCursor(true)
                 .collation(collation)
                 .hint(new Document('a', 1))
-                .comment('this is a comment').iterator()
+                .comment('this is a comment')
+                .exhaust(true).iterator()
 
         def operation = executor.getWriteOperation() as AggregateToCollectionOperation
 

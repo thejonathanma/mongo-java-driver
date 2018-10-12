@@ -290,6 +290,36 @@ public class AggregateOperation<T> implements AsyncReadOperation<AsyncBatchCurso
         return this;
     }
 
+    /**
+     * Returns the exhaust.
+     *
+     * Determines whether the returned cursor from operation execution will be an exhaust cursor. If executing on a server
+     * that doesn't support exhaust cursors, this property is ignored.
+     *
+     * @return the exhaust
+     * @since 3.9
+     * @mongodb.server.release 4.2
+     */
+    public boolean getExhaust() {
+        return wrapped.getExhaust();
+    }
+
+    /**
+     * Sets the exhaust.
+     *
+     * If true, then the returned cursor will be an exhaust cursor following the execution of the operation. If executing
+     * on a server that doesn't support exhaust cursors, this property is ignored.
+     *
+     * @param exhaust the exhaust
+     * @return this
+     * @since 3.9
+     * @mongodb.server.release 4.2
+     */
+    public AggregateOperation<T> exhaust(final boolean exhaust) {
+        wrapped.exhaust(exhaust);
+        return this;
+    }
+
     @Override
     public BatchCursor<T> execute(final ReadBinding binding) {
         return wrapped.execute(binding);

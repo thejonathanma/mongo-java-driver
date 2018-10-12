@@ -60,7 +60,7 @@ class QueryBatchCursor<T> implements BatchCursor<T> {
     private List<T> nextBatch;
     private int count;
     private volatile boolean closed;
-    private volatile boolean exhaust;
+    private final boolean isExhaust;
     private Connection exhaustConnection;
 
     QueryBatchCursor(final QueryResult<T> firstQueryResult, final int limit, final int batchSize, final Decoder<T> decoder) {
@@ -87,14 +87,15 @@ class QueryBatchCursor<T> implements BatchCursor<T> {
         this.limit = limit;
         this.batchSize = batchSize;
         this.decoder = notNull("decoder", decoder);
-        this.exhaust = exhaust;
         if (firstQueryResult.getCursor() != null) {
             notNull("connectionSource", connectionSource);
         }
         if (connectionSource != null) {
             this.connectionSource = connectionSource.retain();
+            this.isExhaust = exhaust && canConnectionBeExhaust();
         } else {
             this.connectionSource = null;
+            this.isExhaust = false;
         }
 
         initFromQueryResult(firstQueryResult);
@@ -106,6 +107,17 @@ class QueryBatchCursor<T> implements BatchCursor<T> {
             this.connectionSource = null;
         }
     }
+
+    private boolean canConnectionBeExhaust() {
+        Connection connection = connectionSource.getConnection();
+        if (serverIsAtLeastVersionFourDotOne(connection.getDescription())) {
+            exhaustConnection = connection;
+            return true;
+        }
+
+        return false;
+    }
+
     @Override
     public boolean hasNext() {
         if (closed) {
@@ -173,6 +185,11 @@ class QueryBatchCursor<T> implements BatchCursor<T> {
                 if (connectionSource != null) {
                     connectionSource.release();
                 }
+
+                if (exhaustConnection != null) {
+                    this.exhaustConnection.release();
+                    this.exhaustConnection = null;
+                }
             }
         }
     }
@@ -224,12 +241,7 @@ class QueryBatchCursor<T> implements BatchCursor<T> {
     }
 
     private void getMore() {
-        Connection connection = connectionSource.getConnection();
-        if (exhaust && serverIsAtLeastVersionFourDotOne(connection.getDescription())) {
-            if (exhaustConnection == null) {
-                exhaustConnection = connection;
-            }
-
+        if (isExhaust) {
             try {
                 getMoreHelper(exhaustConnection);
             } finally {
@@ -239,6 +251,7 @@ class QueryBatchCursor<T> implements BatchCursor<T> {
                 }
             }
         } else {
+            Connection connection = connectionSource.getConnection();
             try {
                 getMoreHelper(connection);
             } finally {
@@ -256,7 +269,7 @@ class QueryBatchCursor<T> implements BatchCursor<T> {
                         ReadPreference.primary(),
                         CommandResultDocumentCodec.create(decoder, "nextBatch"),
                         connectionSource.getSessionContext(),
-                        exhaust));
+                        isExhaust));
             } catch (MongoCommandException e) {
                 throw translateCommandException(e, serverCursor);
             }

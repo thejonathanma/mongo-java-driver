@@ -98,9 +98,10 @@ public final class SyncOperations<TDocument> {
     public <TResult> ReadOperation<BatchCursor<TResult>> aggregate(final List<? extends Bson> pipeline, final Class<TResult> resultClass,
                                                                    final long maxTimeMS, final long maxAwaitTimeMS, final Integer batchSize,
                                                                    final Collation collation, final Bson hint, final String comment,
-                                                                   final Boolean allowDiskUse, final Boolean useCursor) {
+                                                                   final Boolean allowDiskUse, final Boolean useCursor,
+                                                                   final boolean exhaust) {
         return operations.aggregate(pipeline, resultClass, maxTimeMS, maxAwaitTimeMS, batchSize, collation, hint, comment, allowDiskUse,
-                useCursor);
+                useCursor, exhaust);
     }
 
     public WriteOperation<Void> aggregateToCollection(final List<? extends Bson> pipeline, final long maxTimeMS,

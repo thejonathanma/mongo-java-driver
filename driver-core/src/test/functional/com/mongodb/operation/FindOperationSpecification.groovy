@@ -156,22 +156,6 @@ class FindOperationSpecification extends OperationFunctionalSpecification {
         async << [true, false]
     }
 
-    def 'should query with exhaust set'() {
-        given:
-        def document = new Document('_id', 1)
-        getCollectionHelper().insertDocuments(new DocumentCodec(), document)
-        def operation = new FindOperation<Document>(getNamespace(), new DocumentCodec()).exhaust(true)
-
-        when:
-        def results = executeAndCollectBatchCursorResults(operation, async)
-
-        then:
-        results == [document]
-
-        where:
-        async << [true, false]
-    }
-
     def 'should apply filter'() {
         given:
         def document = new Document('_id', 1)
