@@ -21,6 +21,7 @@ import spock.lang.IgnoreIf
 
 import java.util.concurrent.TimeUnit
 
+import static com.mongodb.ClusterFixture.getSslSettings
 import static com.mongodb.ClusterFixture.serverVersionAtLeast
 
 class InternalStreamConnectionFunctionalSpecification extends OperationFunctionalSpecification {
@@ -39,7 +40,7 @@ class InternalStreamConnectionFunctionalSpecification extends OperationFunctiona
             MessageSettings.builder().serverVersion(new ServerVersion([4, 1, 3])).serverType(ServerType.STANDALONE).build(),
             true, null, null, ClusterConnectionMode.SINGLE)
 
-    @IgnoreIf({ !serverVersionAtLeast([4, 1, 3]) })
+    @IgnoreIf({ !serverVersionAtLeast([4, 1, 3]) || getSslSettings().isEnabled() })
     def 'should call sendMessage only once when exhaust is set'() {
         given:
         def collectionHelper = getCollectionHelper()

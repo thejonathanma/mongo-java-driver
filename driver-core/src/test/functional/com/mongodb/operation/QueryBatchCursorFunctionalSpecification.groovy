@@ -26,7 +26,9 @@ import com.mongodb.WriteConcern
 import com.mongodb.binding.ConnectionSource
 import com.mongodb.client.model.CreateCollectionOptions
 import com.mongodb.connection.Connection
+import com.mongodb.connection.ConnectionDescription
 import com.mongodb.connection.QueryResult
+import com.mongodb.connection.ServerVersion
 import org.bson.BsonBoolean
 import org.bson.BsonDocument
 import org.bson.BsonInt32
@@ -564,23 +566,24 @@ class QueryBatchCursorFunctionalSpecification extends OperationFunctionalSpecifi
         def firstBatch = executeQuery(2)
         def exhaustConnection = connectionSource.getConnection()
 
-        def stubConnectionSource = Stub(ConnectionSource)
-        stubConnectionSource.getConnection() >> exhaustConnection
+        def connection = Mock(Connection) {
+            _ * getDescription() >> Stub(ConnectionDescription) {
+                getServerVersion() >> new ServerVersion([4, 1, 3])
+            }
+        }
+        connection.retain() >> exhaustConnection
 
-        def connection = connectionSource.getConnection()
-
-        def cursor = new QueryBatchCursor<Document>(firstBatch, 5, 2, 0, new DocumentCodec(), stubConnectionSource, connection, true)
+        def cursor = new QueryBatchCursor<Document>(firstBatch, 5, 2, 0, new DocumentCodec(), connectionSource, connection, true)
 
         when:
         cursor.hasNext()
 
         then:
-        0 * exhaustConnection.release()
+        0 * connection.release()
 
         cleanup:
-        stubConnectionSource?.release()
         exhaustConnection?.release()
-        connection?.release()
+        connectionSource.release()
     }
 
     def 'should follow limit when exhaust set'() {
